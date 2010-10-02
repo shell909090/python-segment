@@ -8,14 +8,14 @@ from word_dict import word_dict
 
 def cmp_subtree(rslt1, rslt2):
     if rslt1 is None: return True
-    c1 = sum([len(r) for r, i in rslt1 if i == 0])
-    c2 = sum([len(r) for r, i in rslt2 if i == 0])
-    if c1 > c2: return True
-    elif c1 < c2: return False
-    c1 = len([r for r, i in rslt1 if i != 0])
-    c2 = len([r for r, i in rslt2 if i != 0])
-    if c1 > c2: return True
-    elif c1 < c2: return False
+    c1 = [len(r) for r, i in rslt1 if i == 0]
+    c2 = [len(r) for r, i in rslt2 if i == 0]
+    s1, s2 = sum(c1), sum(c2)
+    if s1 > s2: return True
+    elif s1 < s2: return False
+    s1, s2 = len(rslt1) - len(c1), len(rslt2) - len(c2)
+    if s1 > s2: return True
+    elif s1 < s2: return False
     c1 = sum([r[1] for r in rslt1])
     c2 = sum([r[1] for r in rslt2])
     return c1 < c2

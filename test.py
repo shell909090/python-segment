@@ -60,19 +60,19 @@ class utDynamic(unittest.TestCase):
         self.assertEqual(self.p.get_result(), [u'有', u'意见', u'分歧'])
     def test5(self):
         self.c.parse(u'吹毛求疵和鱼鹰是两个有魔力的单词')
-        self.assertEqual(self.p.get_result(), [u'吹毛求疵', u'和鱼鹰是', u'两个', u'有', u'魔力', u'的', u'单词'])
+        self.assertEqual(self.p.get_result(), [u'吹毛求疵', u'和', u'鱼鹰', u'是两个有', u'魔力', u'的', u'单词'])
     def test6(self):
         self.c.parse(u'王强大小')
-        self.assertEqual(self.p.get_result(), [u'王强', u'大小'])
+        self.assertEqual(self.p.get_result(), [u'王', u'强', u'大小'])
     def test7(self):
         self.c.parse(u'毛泽东北京华烟云')
-        self.assertEqual(self.p.get_result(), [u'毛泽东', u'北', u'京华烟云'])
+        self.assertEqual(self.p.get_result(), [u'毛泽东', u'北京', u'华烟云'])
     def test8(self):
         self.c.parse(u'魔王育成计划')
         self.assertEqual(self.p.get_result(), [u'魔王', u'育成', u'计划'])
     def test9(self):
         self.c.parse(u'遥远古古巴比伦')
-        self.assertEqual(self.p.get_result(), [u'遥', u'远古', u'古巴', u'比伦'])
+        self.assertEqual(self.p.get_result(), [u'遥', u'远古', u'古巴比伦'])
 
 def cuttest(word):
     p = ContAll()
@@ -141,5 +141,5 @@ def test_dyn2():
     pass
 
 if __name__ == '__main__':
-    word_dict.load('dict.txt')
+    word_dict.load('cedict.txt')
     unittest.main()
