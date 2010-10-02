@@ -1,0 +1,14 @@
+syntax: glob
+
+build
+debian/files
+debian/python-segment
+debian/python-segment.*
+python-build-stamp*
+pylint.*
+*.elc
+*.pyc
+*.pyo
+*.so
+*.o
+*~
