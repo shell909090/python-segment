@@ -4,6 +4,8 @@ build
 debian/files
 debian/python-segment
 debian/python-segment.*
+debian/python-module-stampdir
+debian/pycompat
 python-build-stamp*
 pylint.*
 *.elc

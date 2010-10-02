@@ -12,6 +12,7 @@ clean:
 	rm -f python-build-stamp*
 	rm -rf debian/python-segment
 	rm -f debian/python-segment*
+	rm -f debian/pycompat
 	rm -rf debian/python-module-stampdir
 
 test:
