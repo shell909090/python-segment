@@ -10,17 +10,18 @@ import segment
 dbname = 'frq.db'
 
 def create(filepath):
-    ddb = segment.dictdb(dbname, 'n')
+    ddb = segment.dictdb()
     ddb.loadtxt(filepath)
-    ddb.flush()
+    ddb.savefile(dbname)
 
 def load(filepath):
-    ddb = segment.dictdb(dbname, 'w')
+    ddb = segment.dictdb()
+    ddb.loadfile(dbname)
     ddb.loadtxt(filepath)
-    ddb.flush()
+    ddb.savefile(dbname)
 
 def export(filepath):
-    with open(filepath, 'w') as fo: ddb.export(fo)
+    with open(filepath, 'w') as fo: ddb.exporttxt(fo)
 
 def trans_cedict(infile, outfile):
     words = set()

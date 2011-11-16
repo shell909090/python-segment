@@ -7,7 +7,8 @@
 import unittest
 import segment
 
-db = segment.dictdb('frq.db', 'r')
+db = segment.dictdb()
+db.loadfile('frq.db')
 
 class utCutter(unittest.TestCase):
 

@@ -9,5 +9,6 @@ from cut import StringCutter
 from dyn import DynamicCutter
 
 def get_cutter(filepath):
-    db = dictdb(filepath, 'r')
+    db = dictdb()
+    db.loadfile(filepath)
     return StringCutter(DynamicCutter(db, None))

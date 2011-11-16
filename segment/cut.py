@@ -46,9 +46,11 @@ class StringCutter(object):
                     for i in self.next.parse(stc[s:e]): yield i
             elif t == 'Nd':
                 e = split_number(stc, s)
+                if self.next: self.next.stop()
                 yield stc[s:e]
             elif t in ['Ll', 'Lu']:
                 e = split_english(stc, s)
+                if self.next: self.next.stop()
                 yield stc[s:e]
             else:
                 e = split_punct(stc, s)
