@@ -20,22 +20,18 @@ def cmp_subtree(rslt1, rslt2):
     c2 = sum([r[1] for r in rslt2])
     return c1 < c2
 
-cache = {}
-def memoiza(fun):
-    def proc(*arg):
-        if arg in cache: return cache[arg]
-        x = fun(*arg)
-        cache[arg] = x
-        return x
-    return proc
-
 def find_first_match(sentence, start_pos = 0):
     for i in xrange(start_pos, len(sentence)):
         cutterset = word_dict.match(sentence[i:])
         if cutterset: return i, cutterset
     return 0, []
 
-def dyn_split(sentence):
+def dyn_split(obj, sentence)
+    if sentence not in obj.cache:
+        obj.cache[sentence] = dyn_split_inner(obj, sentence)
+    return obj.cache[sentence]
+
+def dyn_split_inner(obj, sentence):
     if not sentence: return []
     if len(sentence) < 2: return [(sentence, 0),]
     best_rslt = None
@@ -46,11 +42,11 @@ def dyn_split(sentence):
     else: minlen = min([len(c[0]) for c in cutterset])
     poc, c = find_first_match(sentence, 1)
     while poc < minlen and c:
-        temp_rslt = [(sentence[:poc], 0),] + dyn_split(sentence[poc:])
+        temp_rslt = [(sentence[:poc], 0),] + dyn_split(obj, sentence[poc:])
         if cmp_subtree(best_rslt, temp_rslt): best_rslt = temp_rslt
         poc, c = find_first_match(sentence, poc + 1)
     for cutter, frq in cutterset:
-        temp_rslt = [(cutter, frq),] + dyn_split(sentence[len(cutter):])
+        temp_rslt = [(cutter, frq),] + dyn_split(obj, sentence[len(cutter):])
         if cmp_subtree(best_rslt, temp_rslt): best_rslt = temp_rslt
     if best_rslt is None: best_rslt = [(sentence, 0),]
     if pre_cut: best_rslt.insert(0, (pre_cut, 0))
@@ -64,7 +60,7 @@ class DynamicSpliter(object):
             self.next.parse(word, **kargs)
             self.cache = {}
         if kargs.get('passwd', False): self.next.parse(word, **kargs)
-        for word, frq in dyn_split(word):
+        for word, frq in dyn_split(self, word):
             if frq == 0: self.next.parse(word)
             else: self.next.parse(word, passwd = True, frq = frq)
     def parse_array(self, a): map(self.parse, a)

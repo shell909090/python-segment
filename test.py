@@ -141,5 +141,6 @@ def test_dyn2():
     pass
 
 if __name__ == '__main__':
-    word_dict.load('cedict.txt')
+    # word_dict.load_text('cedict.txt')
+    word_dict.load_pick('cedict.pick')
     unittest.main()

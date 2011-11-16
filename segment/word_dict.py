@@ -4,8 +4,9 @@
 @date: 2010-10-01
 @author: shell.xu
 '''
+from __future__ import with_statement
 import sys
-import bsddb
+import cPickle
 
 def get_tiedlist(key, node, li):
     for k, v in node.items():
@@ -14,14 +15,19 @@ def get_tiedlist(key, node, li):
 
 class TiedTree(object):
     def __init__(self): self.root = {}
-    def load(self, filepath):
-        fp = open(filepath, 'r')
-        for line in fp:
-            line = line.decode('utf-8')
-            i = line.split()
-            self[i[0]] = int(i[1])
-        fp.close()
-    # def save(self): self.root.sync()
+    def load_text(self, filepath):
+        with open(filepath, 'r') as fp:
+            for line in fp:
+                i = line.decode('utf-8').split()
+                self[i[0]] = int(i[1])
+    def save_text(self, filepath):
+        with open(filepath, 'w') as fp:
+            f = lambda k, v: fp.write((u'%s %d\n' % (k, v)).encode('utf-8'))
+            self.get_all(f)
+    def load_pick(self, filepath):
+        with open(filepath, 'rb') as fp: self.root = cPickle.load(fp)
+    def save_pick(self, filepath):
+        with open(filepath, 'wb') as fp: cPickle.dump(self.root, fp, -1)
     def __setitem__(self, key, value):
         n = self.root
         for k in key:
@@ -42,9 +48,22 @@ class TiedTree(object):
             n = n[k]
             if 0 in n: li.append((sentence[:i + 1], n[0]))
         return li
+    def add_value(self, key, value = 1):
+        n = self.root
+        for k in key:
+            if k not in n: return False
+            n = n[k]
+        n[0] += value
+        return True
+    def get_all(self, func, node = None, key = u''):
+        if not node: node = self.root
+        if 0 in node: func(key, node[0])
+        for k, v in node.items():
+            if k != 0: self.get_all(func, v, key + k)
 
 word_dict = TiedTree()
 
 if __name__ == '__main__':
-    for k, v in word_dict.match(u'中华人民共和国'):
-        print k, v
+    word_dict.load_text('cedict.txt')
+    word_dict.save_pick('cedict.pick')
+

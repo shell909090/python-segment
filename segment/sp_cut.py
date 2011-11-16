@@ -57,16 +57,6 @@ class CutterSpliter(object):
         while s < l:
             t, p, s = split_string(word, s)
             if t == 3: self.next.parse(p, passed = True, break_char = True, **kargs)
-            elif t == 2 or t == 1: self.next.parse(p, passed = True, **kargs)
+            elif t in (1, 2): self.next.parse(p, passed = True, **kargs)
             else: self.next.parse (p, **kargs)
     def parse_array(self, a): map(self.parse, a)
-
-class ContPrint(object):
-    def parse(self, word, **kargs):
-        print word
-
-class ContAll(object):
-    def __init__(self): self.rslt = []
-    def parse(self, word, **kargs):
-        if word: self.rslt.append(word)
-    def get_result(self): return self.rslt
