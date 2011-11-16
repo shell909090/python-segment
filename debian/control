@@ -1,13 +1,13 @@
 Source: python-segment
 Section: python
-Priority: extra
-Maintainer: shell <shell909090@gmail.com>
+Priority: optional
+Maintainer: Shell.Xu <shell909090@gmail.com>
 Build-Depends: debhelper (>= 7.0.50~)
 Standards-Version: 3.7.3
-Homepage: http://shell909090.com
+Homepage: http://shell909090.com/
 
 Package: python-segment
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
-Description: A segmentation library written by python.
- A segmentation library written by python.
+Description: segmentation library written by Python.
+ segmentation library written by Python.
