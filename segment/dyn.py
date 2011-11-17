@@ -21,7 +21,7 @@ class DynamicCutter(object):
         if s1 != s2: return s1 > s2
         return sum([r[1] for r in r1]) < sum([r[1] for r in r2])
 
-    def rfinds(self, sentence, start_pos = 0):
+    def rfindc(self, sentence, start_pos = 0):
         for i in xrange(start_pos, len(sentence)):
             cset = self.db.match(sentence[i:])
             if cset: return i, cset
@@ -37,7 +37,7 @@ class DynamicCutter(object):
         if len(sentence) < 2: return [(sentence, 0),]
 
         best_rslt = None
-        poc, cset = self.rfinds(sentence)
+        poc, cset = self.rfindc(sentence)
         if poc == 0: pre_cut, rest = None, sentence
         else: pre_cut, rest = sentence[:poc], sentence[poc:]
 
@@ -48,12 +48,12 @@ class DynamicCutter(object):
 
         if not cset: maxlen = len(rest)
         else: maxlen = max([len(c) for c, f in cset])
-        poc, cset = self.rfinds(rest, 1)
+        poc, cset = self.rfindc(rest, 1)
         while poc < maxlen and cset:
             temp_rslt = [(rest[:poc], 0),] + self.split(rest[poc:])
             if self.cmp_subtree(best_rslt, temp_rslt):
                 best_rslt = temp_rslt
-            poc, cset = self.rfinds(rest, poc + 1)
+            poc, cset = self.rfindc(rest, poc + 1)
 
         if best_rslt is None: best_rslt = [(rest, 0),]
         if pre_cut: best_rslt.insert(0, (pre_cut, 0))

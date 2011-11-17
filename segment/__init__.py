@@ -7,8 +7,7 @@
 from dictdb import dictdb
 from cut import StringCutter
 from dyn import DynamicCutter
+from train import StatCutter, NewCutter
 
 def get_cutter(filepath):
-    db = dictdb()
-    db.loadfile(filepath)
-    return StringCutter(DynamicCutter(db, None))
+    return StringCutter(DynamicCutter(dictdb(filepath), None))

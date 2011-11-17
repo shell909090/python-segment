@@ -57,5 +57,3 @@ class StringCutter(object):
                 if self.next: self.next.stop()
                 yield stc[s:e]
             s = e
-
-    def stop(self): pass

@@ -8,10 +8,15 @@ import os, sys, marshal
 
 class dictdb(object):
 
-    def __init__(self): self.db = {}
+    def __init__(self, filepath):
+        self.filepath, self.db = filepath, {}
+        if filepath: self.loadfile(filepath)
+
     def save(self, fo): marshal.dump(self.db, fo)
     def load(self, fi): self.db = marshal.load(fi)
     def close(self): self.db = {}
+    def sync(self):
+        if self.filepath: self.savefile(self.filepath)
 
     def savefile(self, filepath):
         with open(filepath, 'w') as fo: self.save(fo)
@@ -26,12 +31,25 @@ class dictdb(object):
         with open(filepath, 'r') as fi:
             for line in fi:
                 i = line.strip().decode('utf-8').split()
-                self.add(i[0], int(i[1]))
+                self.add(i[0], float(i[1]))
 
     def exporttxt(self, fo):
         for h, vs in self.db.items():
             for k, v in vs.items():
-                print >>fo, h.decode('utf-16') + k, v
+                d = u'%s %f\n' % (h.decode('utf-16') + k, v)
+                fo.write(d.encode('utf-8'))
+
+    def reduce(self, factor):
+        for h, vs in self.db.items():
+            for k, v in vs.items(): vs[k] = v * factor
+
+    def shrink(self, threshold):
+        zero = []
+        for h, vs in self.db.items():
+            self.db[h] = dict([(k, v) for k, v in vs.items()
+                               if v > threshold])
+            if len(self.db[h]) == 0: zero.append(h)
+        for z in zero: del self.db[z]
 
     def add(self, w, f):
         if len(w) < 2: return
