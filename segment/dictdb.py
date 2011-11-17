@@ -8,7 +8,7 @@ import os, sys, marshal
 
 class dictdb(object):
 
-    def __init__(self, filepath):
+    def __init__(self, filepath = None):
         self.filepath, self.db = filepath, {}
         if filepath: self.loadfile(filepath)
 

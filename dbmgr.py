@@ -15,12 +15,12 @@ def create(filepath):
     ddb.savefile(dbname)
 
 def load(filepath):
-    ddb = segment.dictdb()
-    ddb.loadfile(dbname)
+    ddb = segment.dictdb(dbname)
     ddb.loadtxt(filepath)
-    ddb.savefile(dbname)
+    ddb.sync()
 
 def export(filepath):
+    ddb = segment.dictdb(dbname)
     with open(filepath, 'w') as fo: ddb.exporttxt(fo)
 
 def trans_cedict(infile, outfile):
