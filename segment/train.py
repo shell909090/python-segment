@@ -30,10 +30,19 @@ class StatCutter(dyn.DynamicCutter):
 class NewCutter(object):
     HIGHFRQ = u'的我了是不一这个在人来大么有你那就小说们到出要着上好然可啊他过后还和'
 
-    def __init__(self): self.wordset = set()
+    def __init__(self): self.wordfrq = {}
 
     def parse(self, word):
         if len(word) >= 3:
-            if not any([(c in word) for c in self.HIGHFRQ]):
-                self.wordset.add(word)
+            sp = word
+            while sp[0] in self.HIGHFRQ or sp[-1] in self.HIGHFRQ:
+                if sp[0] in self.HIGHFRQ: del sp[0]
+                if sp[-1] in self.HIGHFRQ: del sp[-1]
+            if not any([(c in sp) for c in self.HIGHFRQ]):
+                if sp not in self.wordfrq: self.wordfrq[sp] = 0
+                self.wordfrq[sp] += 1
         return [word,]
+
+    def get_highfrq(self):
+        r = sorted(self.wordfrq.items(), key = lambda x: x[1])
+        return r[len(r)/10:]
