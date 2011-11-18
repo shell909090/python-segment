@@ -10,18 +10,17 @@ import chardet
 from os import path
 import segment
 
-def cutfile(filepath):
-    cut = segment.get_cutter('frq.db')
-    with open(filepath, 'r') as fi: data = fi.read().decode('gbk')
-    return list(cut.parse(data))
-
 def frqfile(cut, filepath):
     print 'process', filepath
     with open(filepath, 'r') as fi: data = fi.read()
-    enc = chardet.detect(data).get('encoding', 'utf-8')
+    enc = chardet.detect(data[:1200]).get('encoding', 'utf-8')
     if enc is None: enc = 'utf-8'
     data = data.decode(enc, 'ignore')
-    list(cut.parse(data))
+    return list(cut.parse(data))
+
+def cutfile(filepath):
+    cut = segment.get_cutter('frq.db')
+    return frqfile(cut, filepath)
 
 def frqtrain(filepath):
     stat = segment.StatCutter(segment.dictdb('frq.db'), None)

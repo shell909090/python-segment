@@ -32,7 +32,7 @@ class spider(threading.Thread):
         content_type = httpfile.info()['Content-Type']
         if content_type not in ['text/html', 'text/plain']: return
         data = httpfile.read()
-        enc = chardet.detect(data).get('encoding', 'utf-8')
+        enc = chardet.detect(data[1200:]).get('encoding', 'utf-8')
         if enc is None: enc = 'utf-8'
         data = data.decode(enc, 'ignore')
         if content_type == 'text/html':
