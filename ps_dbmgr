@@ -23,6 +23,17 @@ def export(filepath):
     ddb = segment.dictdb(dbname)
     with open(filepath, 'w') as fo: ddb.exporttxt(fo)
 
+def statdb():
+    ddb = segment.dictdb(dbname)
+    print 'count:', ddb.count()
+    print 'sumvalue:', ddb.sumvalue()
+    print 'avgvalue:', ddb.sumvalue() / ddb.count()
+    print 'maxvalue:', ddb.maxvalue()
+
+def waterlevel(wl):
+    ddb = segment.dictdb(dbname)
+    print ddb.waterlevel(float(wl))
+
 def trans_cedict(infile, outfile):
     words = set()
     with open(infile, 'r') as fi:
@@ -51,12 +62,15 @@ def main():
         if opt == '-d':
             global dbname
             dbname = val
-    funcs = ['create', 'load', 'export', 'trans_cedict', 'trans_plain']
+    funcs = ['create', 'load', 'export', 'statdb', 'waterlevel',
+             'trans_cedict', 'trans_plain']
     if len(args) == 0:
         print '%s [%s] .. filename' % (sys.argv[0], '|'.join(funcs))
     elif args[0] == 'create': create(args[1])
     elif args[0] == 'load': load(args[1])
     elif args[0] == 'export': export(args[1])
+    elif args[0] == 'statdb': statdb()
+    elif args[0] == 'waterlevel': waterlevel(args[1])
     elif args[0] == 'trans_cedict': trans_cedict(args[1], args[2])
     elif args[0] == 'trans_plain': trans_plain(args[1], args[2])
 

@@ -27,22 +27,34 @@ class StatCutter(dyn.DynamicCutter):
         for k, v in self.wordfrq.items(): self.db.add(k, v)
         if sync: self.db.sync()
 
-class NewCutter(object):
-    HIGHFRQ = u'的我了是不一这个在人来大么有你那就小说们到出要着上好然可啊他过后还和'
+    def join(self, stat):
+        for k, v in stat.wordfrq.items():
+            self.wordfrq[k] = self.wordfrq.get(k, 0) + v
+        return self
 
+HIGHFRQ = u'的我了是不一这个在人来大么有你那就小说们到出\
+要着上好然可啊他过后还和为对吧与之'
+class NewCutter(object):
     def __init__(self): self.wordfrq = {}
 
     def parse(self, word):
-        if len(word) >= 3:
-            sp = word
-            while sp[0] in self.HIGHFRQ or sp[-1] in self.HIGHFRQ:
-                if sp[0] in self.HIGHFRQ: del sp[0]
-                if sp[-1] in self.HIGHFRQ: del sp[-1]
-            if not any([(c in sp) for c in self.HIGHFRQ]):
+        if len(word) >= 2:
+            for s in xrange(len(word)):
+                if word[s] not in HIGHFRQ: break
+            for e in xrange(len(word)-1, -1, -1):
+                if word[e] not in HIGHFRQ: break
+            sp = word[s:e+1]
+            if len(sp) >= 2:
                 if sp not in self.wordfrq: self.wordfrq[sp] = 0
                 self.wordfrq[sp] += 1
         return [word,]
 
     def get_highfrq(self):
-        r = sorted(self.wordfrq.items(), key = lambda x: x[1])
-        return r[len(r)/10:]
+        r = sorted(self.wordfrq.items(), key = lambda x: x[1], reverse = True)
+        avg = int(float(sum(map(lambda x:x[1], r))) / len(r)) + 1
+        return filter(lambda x:x[1]>avg, r)
+
+    def join(self, new):
+        for k, v in new.wordfrq.items():
+            self.wordfrq[k] = self.wordfrq.get(k, 0) + v
+        return self

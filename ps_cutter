@@ -5,6 +5,9 @@
 @author: shell.xu
 '''
 import os, sys, time
+import traceback
+import chardet
+from os import path
 import segment
 
 def cutfile(filepath):
@@ -12,23 +15,46 @@ def cutfile(filepath):
     with open(filepath, 'r') as fi: data = fi.read().decode('gbk')
     return list(cut.parse(data))
 
-def frqtrain(filepath):
-    db = segment.dictdb('frq.db')
-    stat = segment.StatCutter(db, None)
-    cut = segment.StringCutter(stat)
-    with open(filepath, 'r') as fi: data = fi.read().decode('gbk')
+def frqfile(cut, filepath):
+    print 'process', filepath
+    with open(filepath, 'r') as fi: data = fi.read()
+    enc = chardet.detect(data).get('encoding', 'utf-8')
+    if enc is None: enc = 'utf-8'
+    data = data.decode(enc, 'ignore')
     list(cut.parse(data))
+
+def frqtrain(filepath):
+    stat = segment.StatCutter(segment.dictdb('frq.db'), None)
+    frqfile(segment.StringCutter(stat), filepath)
     stat.train()
-    db.exporttxt(sys.stdout)
 
 def newtrain(filepath):
     db = segment.dictdb('frq.db')
     new = segment.NewCutter()
     cut = segment.StringCutter(segment.DynamicCutter(db, new))
-    with open(filepath, 'r') as fi: data = fi.read().decode('gbk')
-    list(cut.parse(data))
-    for i in new.wordset:
-        print i.encode('utf-8')
+    frqfile(cut, filepath)
+    for word, frq in new.get_highfrq():
+        print word.encode('utf-8'), frq
+
+def frqtrains(dirpath):
+    stat = segment.StatCutter(segment.dictdb('frq.db'), None)
+    cut = segment.StringCutter(stat)
+    for base, dirs, files in os.walk(dirpath):
+        for filename in files:
+            try: frqfile(cut, path.join(base, filename))
+            except: traceback.print_exc()
+    stat.train(True)
+
+def newtrains(dirpath):
+    db = segment.dictdb('frq.db')
+    new = segment.NewCutter()
+    cut = segment.StringCutter(segment.DynamicCutter(db, new))
+    for base, dirs, files in os.walk(dirpath):
+        for filename in files:
+            try: frqfile(cut, path.join(base, filename))
+            except: traceback.print_exc()
+    for word, frq in new.get_highfrq():
+        print word.encode('utf-8'), frq
 
 def frqstat(filepath):
     frq = {}
@@ -43,13 +69,16 @@ def frqstat(filepath):
 
 def main():
     if len(sys.argv) == 1:
-        cmds = ['cutshow', 'cut', 'frqtrain', 'newtrain', 'frqstat']
+        cmds = ['cutshow', 'cut', 'frqtrain', 'newtrain',
+                'frqtrains', 'newtrains', 'frqstat']
         print '%s [%s]' % (sys.argv[0], '|'.join(cmds))
     elif sys.argv[1] == 'cutshow':
         print '|'.join(cutfile(sys.argv[2])).encode('utf-8')
     elif sys.argv[1] == 'cut': cutfile(sys.argv[2])
     elif sys.argv[1] == 'frqtrain': frqtrain(sys.argv[2])
     elif sys.argv[1] == 'newtrain': newtrain(sys.argv[2])
+    elif sys.argv[1] == 'frqtrains': frqtrains(sys.argv[2])
+    elif sys.argv[1] == 'newtrains': newtrains(sys.argv[2])
     elif sys.argv[1] == 'frqstat': frqstat(sys.argv[2])
 
 if __name__ == '__main__': main()

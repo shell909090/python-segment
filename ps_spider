@@ -1,0 +1,71 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+'''
+@date: 2011-11-18
+@author: shell.xu
+'''
+import os, sys, urllib
+import threading, urlparse, traceback
+import html2text, chardet
+from StringIO import StringIO
+from lxml import etree, html
+sys.path.insert(0, '../')
+import segment
+
+queue = []
+
+class spider(threading.Thread):
+
+    def __init__(self, cut, fix):
+        super(spider, self).__init__()
+        self.cut, self.fix = cut, fix
+
+    def run(self):
+        while queue:
+            try: self.proc(queue.pop())
+            except: traceback.print_exc()
+
+    def proc(self, job):
+        if urlparse.urlparse(job[0]).netloc != self.fix: return
+        print 'process %s' % job[0]
+        httpfile = urllib.urlopen(job[0])
+        content_type = httpfile.info()['Content-Type']
+        if content_type not in ['text/html', 'text/plain']: return
+        data = httpfile.read()
+        enc = chardet.detect(data).get('encoding', 'utf-8')
+        if enc is None: enc = 'utf-8'
+        data = data.decode(enc, 'ignore')
+        if content_type == 'text/html':
+            if job[1] > 0:
+                doc = html.fromstring(data)
+                doc.make_links_absolute(job[0])
+                for link in doc.iterlinks():
+                    queue.append((link[2], job[1] - 1))
+            txt = html2text.html2text(data)
+        elif content_type == 'text/plain': txt = data
+        list(self.cut.parse(txt))
+
+def main():
+    db = segment.dictdb('frq.db')
+    queue.append((sys.argv[2], 2))
+    trains, spiders = [], []
+    for i in xrange(10):
+        if sys.argv[1] == 'new':
+            new = segment.NewCutter()
+            cut = segment.StringCutter(segment.DynamicCutter(db, new))
+            trains.append(new)
+        else:
+            stat = segment.StatCutter(db, None)
+            cut = segment.StringCutter(stat)
+            trains.append(stat)
+        s = spider(cut, urlparse.urlparse(sys.argv[2]).netloc)
+        s.start()
+        spiders.append(s)
+    for s in spiders: s.join()
+    t = reduce(lambda x, y: x.join(y), trains)
+    if sys.argv[1] == 'new':
+        for k, v in t.get_highfrq():
+            print k.encode('utf-8'), v
+    else: t.train(True)
+
+if __name__ == '__main__': main()

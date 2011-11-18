@@ -39,6 +39,23 @@ class dictdb(object):
                 d = u'%s %f\n' % (h.decode('utf-16') + k, v)
                 fo.write(d.encode('utf-8'))
 
+    def items(self):
+        for h, vs in self.db.items():
+            for k, v in vs.items(): yield h.decode('utf-16') + k, v
+
+    def sumvalue(self):
+        return sum([sum(vs.values()) for vs in self.db.values()])
+
+    def count(self):
+        return sum([len(vs) for vs in self.db.values()])
+
+    def maxvalue(self):
+        return max([max(vs.values()) for vs in self.db.values()])
+
+    def waterlevel(self, threshold):
+        return sum([len([v for v in vs.values() if v >= threshold])
+                    for vs in self.db.values()])
+
     def reduce(self, factor):
         for h, vs in self.db.items():
             for k, v in vs.items(): vs[k] = v * factor
@@ -47,7 +64,7 @@ class dictdb(object):
         zero = []
         for h, vs in self.db.items():
             self.db[h] = dict([(k, v) for k, v in vs.items()
-                               if v > threshold])
+                               if v >= threshold])
             if len(self.db[h]) == 0: zero.append(h)
         for z in zero: del self.db[z]
 
