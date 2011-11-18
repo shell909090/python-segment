@@ -32,7 +32,7 @@ class dictdb(object):
         with open(filepath, 'r') as fi:
             for line in fi:
                 i = line.strip().decode('utf-8').split()
-                if len(i[0]) == 1: self.db[i[0]] = float(i[1])
+                if len(i[0]) == 1: self.sdb[i[0]] = float(i[1])
                 else: self.add(i[0], float(i[1]))
         self.normalize()
 
@@ -49,6 +49,9 @@ class dictdb(object):
 
     def gets(self, w):
         return math.log(self.sdb.get(w, 1)) - self.sdbs
+
+    def cals(self, ws):
+        return sum(map(self.gets, ws))
 
     def hifrqs(self):
         return sorted(self.sdb.items(), lambda x:x[1], reverse = True)[40:]
@@ -92,11 +95,12 @@ class dictdb(object):
         if w[2:] not in d: return
         del d[w[2:]]
 
-    def __getitem__(self, w):
+    def get(self, w):
         if len(w) < 2: return 0
         h = w[:2].encode('utf-16')
         if h not in self.db: return 0
-        return self.db[h].get(w[2:], 0)
+        if w[2:] not in self.db[h]: return 0
+        return math.log(self.db[h][w[2:]]) - self.dbs
 
     def match(self, sentence):
         if len(sentence) < 2: return

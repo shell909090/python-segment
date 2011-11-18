@@ -4,7 +4,6 @@
 @date: 2011-11-16
 @author: shell.xu
 '''
-import math
 from dictdb import dictdb
 
 class DynamicCutter(object):
@@ -14,6 +13,7 @@ class DynamicCutter(object):
     @staticmethod
     def cmp_subtree(r1, r2):
         if r1 is None: return True
+        # print '+', r1; print '-', r2
         c1 = [len(r) for r, i in r1[1] if i == 0]
         c2 = [len(r) for r, i in r2[1] if i == 0]
         s1, s2 = sum(c1), sum(c2)
@@ -34,15 +34,14 @@ class DynamicCutter(object):
         return self.cache[sentence]
 
     def _split(self, sentence):
-        if not sentence: raise Exception("Hmmm....,I don't know what happen.")
-        if len(sentence) == 1:
-            return self.db.gets(sentence), [(sentence, 0),]
+        if not sentence: return 0, []
+        if len(sentence) == 1: return self.db.gets(sentence), [(sentence, 0),]
 
         # looking for the first matches word
         best_rslt = None
         poc, cset = self.rfindc(sentence)
         if poc == -1:
-            return (sum(map(self.db.get, sentence)), [(sentence, 0),])
+            return (sum(map(self.db.gets, sentence)), [(sentence, 0),])
         pre_cut, rest = sentence[:poc], sentence[poc:]
 
         # see which of matches is the bast choice
@@ -57,16 +56,16 @@ class DynamicCutter(object):
         poc, cset = self.rfindc(rest, 1)
         while poc < maxlen and cset:
             r = self.split(rest[poc:])
-            temp_rslt = (sum(map(self.db.get, rest[:poc])) + r[0],
+            temp_rslt = (self.db.cals(rest[:poc]) + r[0],
                          [(rest[:poc], 0),] + r[1])
             if self.cmp_subtree(best_rslt, temp_rslt):
                 best_rslt = temp_rslt
             poc, cset = self.rfindc(rest, poc + 1)
 
         if pre_cut:
-            base_rslt = (sum(map(self.db.get, pre_cut)) + base_rslt[0],
-                         [(pre_cut, 0),] + base_rslt[1])
-        # print '%s => %d %s' % (sentence, best_rslt[0], best_rslt[1])
+            best_rslt = (self.db.cals(pre_cut) + best_rslt[0],
+                         [(pre_cut, 0),] + best_rslt[1])
+        # print '%s => %f %s' % (sentence, best_rslt[0], best_rslt[1])
         return best_rslt
 
     def parse(self, sentence):

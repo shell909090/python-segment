@@ -11,48 +11,55 @@ dbname = 'frq.db'
 
 def create(filepath):
     ddb = segment.dictdb()
-    ddb.loadtxt(filepath)
+    ddb.importtxt(filepath)
     ddb.savefile(dbname)
 
 def importdb(filepath):
     ddb = segment.dictdb(dbname)
-    ddb.loadtxt(filepath)
+    ddb.importtxt(filepath)
     ddb.sync()
 
 def exportdb(filepath):
     ddb = segment.dictdb(dbname)
     with open(filepath, 'w') as fo: ddb.exporttxt(fo)
 
-def adddb(word, frq):
+def add(word, frq):
     ddb = segment.dictdb(dbname)
     ddb.add(word.decode('utf-8'), float(frq))
     ddb.sync()
 
-def removedb(word):
+def remove(word):
     ddb = segment.dictdb(dbname)
     ddb.remove(word.decode('utf-8'))
     ddb.sync()
 
-def lookupdb(word):
+def lookup(word):
     ddb = segment.dictdb(dbname)
-    print word, ddb[word.decode('utf-8')]
+    word = word.decode('utf-8')
+    if len(word) == 1: print word, ddb.gets(word)
+    else: print word, ddb.get(word)
 
-def statdb():
+def cals(word):
     ddb = segment.dictdb(dbname)
-    count, sumval = len(ddb.values()), sum(ddb.values())
-    print 'count: %f\nsumvalue: %f' % (count, sumval)
+    word = word.decode('utf-8')
+    print word, ddb.cals(word)
+
+def stat():
+    ddb = segment.dictdb(dbname)
+    count, sumval = len(list(ddb.values())), sum(ddb.values())
+    print 'count: %d\nsumvalue: %f' % (count, sumval)
     print 'avgvalue: %f\nmaxvalue: %f' % (sumval / count, max(ddb.values()))
 
 def waterlevel(wl):
     ddb = segment.dictdb(dbname)
     print ddb.waterlevel(float(wl))
 
-def reducedb(factor):
+def reduce(factor):
     ddb = segment.dictdb(dbname)
     ddb.reduce(float(factor))
     ddb.sync()
 
-def shrinkdb(threshold):
+def shrink(threshold):
     ddb = segment.dictdb(dbname)
     ddb.shrink(float(threshold))
     ddb.sync()
@@ -79,15 +86,15 @@ def trans_plain(infile, outfile):
         for word in list(words):
             fo.write((u'%s 1\n' % word).encode('utf-8'))
 
+cmds = ['create', 'importdb', 'exportdb', 'add', 'remove',
+        'lookup', 'cals', 'stat', 'waterlevel', 'reduce', 'shrink',
+        'trans_cedict', 'trans_plain']
 def main():
     opts, args = getopt.getopt(sys.argv[1:], 'd:')
     for opt, val in opts:
         if opt == '-d':
             global dbname
             dbname = val
-    funcs = ['create', 'importdb', 'exportdb', 'adddb', 'removedb',
-             'lookup', 'statdb', 'waterlevel', 'reducedb', 'shrinkdb',
-             'trans_cedict', 'trans_plain']
     if len(args) == 0:
         print '%s cmds params ...' % sys.argv[0]
         for name in cmds: print '%s:%s' % (name, eval(name).__doc__)
