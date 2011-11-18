@@ -14,14 +14,28 @@ def create(filepath):
     ddb.loadtxt(filepath)
     ddb.savefile(dbname)
 
-def load(filepath):
+def importdb(filepath):
     ddb = segment.dictdb(dbname)
     ddb.loadtxt(filepath)
     ddb.sync()
 
-def export(filepath):
+def exportdb(filepath):
     ddb = segment.dictdb(dbname)
     with open(filepath, 'w') as fo: ddb.exporttxt(fo)
+
+def adddb(word, frq):
+    ddb = segment.dictdb(dbname)
+    ddb.add(word.decode('utf-8'), float(frq))
+    ddb.sync()
+
+def removedb(word):
+    ddb = segment.dictdb(dbname)
+    ddb.remove(word.decode('utf-8'))
+    ddb.sync()
+
+def lookupdb(word):
+    ddb = segment.dictdb(dbname)
+    print word, ddb[word.decode('utf-8')]
 
 def statdb():
     ddb = segment.dictdb(dbname)
@@ -72,18 +86,21 @@ def main():
         if opt == '-d':
             global dbname
             dbname = val
-    funcs = ['create', 'load', 'export', 'statdb',
-             'waterlevel', 'reducedb', 'shrinkdb',
+    funcs = ['create', 'import', 'export', 'add', 'remove', 'lookup',
+             'stat', 'waterlevel', 'reduce', 'shrink',
              'trans_cedict', 'trans_plain']
     if len(args) == 0:
         print '%s [%s] .. filename' % (sys.argv[0], '|'.join(funcs))
     elif args[0] == 'create': create(args[1])
-    elif args[0] == 'load': load(args[1])
-    elif args[0] == 'export': export(args[1])
-    elif args[0] == 'statdb': statdb()
+    elif args[0] == 'import': importdb(args[1])
+    elif args[0] == 'export': exportdb(args[1])
+    elif args[0] == 'add': adddb(args[1], args[2])
+    elif args[0] == 'remove': removedb(args[1])
+    elif args[0] == 'lookup': lookup(args[1])
+    elif args[0] == 'stat': statdb()
     elif args[0] == 'waterlevel': waterlevel(args[1])
-    elif args[0] == 'reducedb': reducedb(args[1])
-    elif args[0] == 'shrinkdb': shrinkdb(args[1])
+    elif args[0] == 'reduce': reducedb(args[1])
+    elif args[0] == 'shrink': shrinkdb(args[1])
     elif args[0] == 'trans_cedict': trans_cedict(args[1], args[2])
     elif args[0] == 'trans_plain': trans_plain(args[1], args[2])
 

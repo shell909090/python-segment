@@ -2,6 +2,7 @@ syntax: glob
 
 pylint.*
 txt/*
+frq.db
 *.elc
 *.pyc
 *.pyo
