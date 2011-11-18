@@ -34,6 +34,16 @@ def waterlevel(wl):
     ddb = segment.dictdb(dbname)
     print ddb.waterlevel(float(wl))
 
+def reducedb(factor):
+    ddb = segment.dictdb(dbname)
+    ddb.reduce(float(factor))
+    ddb.sync()
+
+def shrinkdb(threshold):
+    ddb = segment.dictdb(dbname)
+    ddb.shrink(float(threshold))
+    ddb.sync()
+
 def trans_cedict(infile, outfile):
     words = set()
     with open(infile, 'r') as fi:
@@ -62,7 +72,8 @@ def main():
         if opt == '-d':
             global dbname
             dbname = val
-    funcs = ['create', 'load', 'export', 'statdb', 'waterlevel',
+    funcs = ['create', 'load', 'export', 'statdb',
+             'waterlevel', 'reducedb', 'shrinkdb',
              'trans_cedict', 'trans_plain']
     if len(args) == 0:
         print '%s [%s] .. filename' % (sys.argv[0], '|'.join(funcs))
@@ -71,6 +82,8 @@ def main():
     elif args[0] == 'export': export(args[1])
     elif args[0] == 'statdb': statdb()
     elif args[0] == 'waterlevel': waterlevel(args[1])
+    elif args[0] == 'reducedb': reducedb(args[1])
+    elif args[0] == 'shrinkdb': shrinkdb(args[1])
     elif args[0] == 'trans_cedict': trans_cedict(args[1], args[2])
     elif args[0] == 'trans_plain': trans_plain(args[1], args[2])
 
