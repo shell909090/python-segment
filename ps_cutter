@@ -4,80 +4,95 @@
 @date: 2011-11-16
 @author: shell.xu
 '''
-import os, sys, time
-import traceback
-import chardet
+import os, sys, time, traceback
+import chardet, segment
 from os import path
-import segment
 
-def frqfile(cut, filepath):
-    print 'process', filepath
+def readfile_chardet(filepath):
     with open(filepath, 'r') as fi: data = fi.read()
     enc = chardet.detect(data[:1200]).get('encoding', 'utf-8')
     if enc is None: enc = 'utf-8'
-    data = data.decode(enc, 'ignore')
-    return list(cut.parse(data))
+    return data.decode(enc, 'ignore')
 
-def cutfile(filepath):
+def walkdir(basepath, func, *params):
+    for base, dirs, files in os.walk(basepath):
+        for filename in files:
+            try: func(path.join(base, filename), *params)
+            except: traceback.print_exc()
+
+def cutfile(filepath, cut):
+    print 'process', filepath
+    return list(cut.parse(readfile_chardet(filepath)))
+
+def cut(*filepathes):
+    ''' cut filepath ... : cut a file and not print out. '''
     cut = segment.get_cutter('frq.db')
-    return frqfile(cut, filepath)
+    for fp in filepathes: cutfile(fp, cut)
 
-def frqtrain(filepath):
-    stat = segment.StatCutter(segment.dictdb('frq.db'), None)
-    frqfile(segment.StringCutter(stat), filepath)
-    stat.train()
+def cutshow(*filepathes):
+    ''' cutshow filepath ... : cut a file and print out. '''
+    cut = segment.get_cutter('frq.db')
+    for fp in filepathes: print '|'.join(cutfile(fp, cut)).encode('utf-8')
 
-def newtrain(filepath):
-    db = segment.dictdb('frq.db')
-    new = segment.NewCutter()
-    cut = segment.StringCutter(segment.DynamicCutter(db, new))
-    frqfile(cut, filepath)
-    for word, frq in new.get_highfrq():
-        print word.encode('utf-8'), frq
-
-def frqtrains(dirpath):
+def frqtrain(*filepathes):
+    ''' frqtrain filepath ... : train frequency by files. '''
     stat = segment.StatCutter(segment.dictdb('frq.db'), None)
     cut = segment.StringCutter(stat)
-    for base, dirs, files in os.walk(dirpath):
-        for filename in files:
-            try: frqfile(cut, path.join(base, filename))
-            except: traceback.print_exc()
+    for fp in filepathes: cutfile(filepath, cut)
+    stat.train()
+
+def frqtrains(basepath):
+    ''' frqtrain dirpath : train frequency by all files under dir. '''
+    stat = segment.StatCutter(segment.dictdb('frq.db'), None)
+    cut = segment.StringCutter(stat)
+    walkdir(basepath, cutfile, cut)
     stat.train(True)
 
-def newtrains(dirpath):
+def newtrain(*filepathes):
+    ''' newtrain filepath ... : train new words by files. '''
     db = segment.dictdb('frq.db')
     new = segment.NewCutter()
     cut = segment.StringCutter(segment.DynamicCutter(db, new))
-    for base, dirs, files in os.walk(dirpath):
-        for filename in files:
-            try: frqfile(cut, path.join(base, filename))
-            except: traceback.print_exc()
+    for fp in filepathes: cutfile(fp, cut)
     for word, frq in new.get_highfrq():
         print word.encode('utf-8'), frq
 
-def frqstat(filepath):
-    frq = {}
-    with open(filepath, 'r') as fi: data = fi.read().decode('gbk')
+def newtrains(basepath):
+    ''' newtrains dirpath : train new words by all files under dir. '''
+    db = segment.dictdb('frq.db')
+    new = segment.NewCutter()
+    cut = segment.StringCutter(segment.DynamicCutter(db, new))
+    walkdir(basepath, cutfile, cut)
+    for word, frq in new.get_highfrq():
+        print word.encode('utf-8'), frq
+
+def frqfile(filepath, frq):
+    print 'process', filepath
+    data = readfile_chardet(filepath)
     for i in data:
         if i not in frq: frq[i] = 0
         frq[i] += 1
-    print sum(frq.values())
-    d = sorted([(k, v) for k, v in frq.items() if v > 10],
-               key = lambda x: x[1], reverse = True)
-    for k, v in d: print k.encode('utf-8'), v
 
+def frqstat(*filepathes):
+    ''' frqstat filepath ... : statistics frequency of char in files. '''
+    frq = {}
+    for fp in filepathes: frqfile(fp, frq)
+    for k, v in sorted(frq.items(), key = lambda x:x[1], reverse = True):
+        print k.encode('utf-8'), v
+
+def frqstats(basepath):
+    ''' frqstats dirpath : statistics frequency in all files under dir. '''
+    frq = {}
+    walkdir(basepath, frqfile, frq)
+    for k, v in sorted(frq.items(), key = lambda x:x[1], reverse = True):
+        print k.encode('utf-8'), v
+
+cmds = ['cut', 'cutshow', 'frqtrain', 'newtrain',
+        'frqtrains', 'newtrains', 'frqstat', 'frqstats']
 def main():
     if len(sys.argv) == 1:
-        cmds = ['cutshow', 'cut', 'frqtrain', 'newtrain',
-                'frqtrains', 'newtrains', 'frqstat']
-        print '%s [%s]' % (sys.argv[0], '|'.join(cmds))
-    elif sys.argv[1] == 'cutshow':
-        print '|'.join(cutfile(sys.argv[2])).encode('utf-8')
-    elif sys.argv[1] == 'cut': cutfile(sys.argv[2])
-    elif sys.argv[1] == 'frqtrain': frqtrain(sys.argv[2])
-    elif sys.argv[1] == 'newtrain': newtrain(sys.argv[2])
-    elif sys.argv[1] == 'frqtrains': frqtrains(sys.argv[2])
-    elif sys.argv[1] == 'newtrains': newtrains(sys.argv[2])
-    elif sys.argv[1] == 'frqstat': frqstat(sys.argv[2])
+        print '%s cmds params ...' % sys.argv[0]
+        for name in cmds: print '%s:%s' % (name, eval(name).__doc__)
+    else: eval(sys.argv[1])(*sys.argv[2:])
 
 if __name__ == '__main__': main()

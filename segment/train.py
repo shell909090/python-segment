@@ -5,7 +5,7 @@
 @author: shell.xu
 '''
 import os, sys
-import dyn
+import dyn, dictdb
 
 class StatCutter(dyn.DynamicCutter):
 
@@ -32,17 +32,18 @@ class StatCutter(dyn.DynamicCutter):
             self.wordfrq[k] = self.wordfrq.get(k, 0) + v
         return self
 
-HIGHFRQ = u'的我了是不一这个在人来大么有你那就小说们到出\
-要着上好然可啊他过后还和为对吧与之'
+# HIGHFRQ = u'的我了是不一这个在人来大么有你那就小说们到出\
+# 要着上好然可啊他过后还和为对吧与之'
 class NewCutter(object):
-    def __init__(self): self.wordfrq = {}
+    def __init__(self, db):
+        self.wordfrq, self.hifrqs = {}, db.hifrqs()
 
     def parse(self, word):
         if len(word) >= 2:
             for s in xrange(len(word)):
-                if word[s] not in HIGHFRQ: break
+                if word[s] not in self.hifrqs: break
             for e in xrange(len(word)-1, -1, -1):
-                if word[e] not in HIGHFRQ: break
+                if word[e] not in self.hifrqs: break
             sp = word[s:e+1]
             if len(sp) >= 2:
                 if sp not in self.wordfrq: self.wordfrq[sp] = 0

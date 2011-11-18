@@ -39,10 +39,9 @@ def lookupdb(word):
 
 def statdb():
     ddb = segment.dictdb(dbname)
-    print 'count:', ddb.count()
-    print 'sumvalue:', ddb.sumvalue()
-    print 'avgvalue:', ddb.sumvalue() / ddb.count()
-    print 'maxvalue:', ddb.maxvalue()
+    count, sumval = len(ddb.values()), sum(ddb.values())
+    print 'count: %f\nsumvalue: %f' % (count, sumval)
+    print 'avgvalue: %f\nmaxvalue: %f' % (sumval / count, max(ddb.values()))
 
 def waterlevel(wl):
     ddb = segment.dictdb(dbname)
@@ -86,22 +85,12 @@ def main():
         if opt == '-d':
             global dbname
             dbname = val
-    funcs = ['create', 'import', 'export', 'add', 'remove', 'lookup',
-             'stat', 'waterlevel', 'reduce', 'shrink',
+    funcs = ['create', 'importdb', 'exportdb', 'adddb', 'removedb',
+             'lookup', 'statdb', 'waterlevel', 'reducedb', 'shrinkdb',
              'trans_cedict', 'trans_plain']
     if len(args) == 0:
-        print '%s [%s] .. filename' % (sys.argv[0], '|'.join(funcs))
-    elif args[0] == 'create': create(args[1])
-    elif args[0] == 'import': importdb(args[1])
-    elif args[0] == 'export': exportdb(args[1])
-    elif args[0] == 'add': adddb(args[1], args[2])
-    elif args[0] == 'remove': removedb(args[1])
-    elif args[0] == 'lookup': lookup(args[1])
-    elif args[0] == 'stat': statdb()
-    elif args[0] == 'waterlevel': waterlevel(args[1])
-    elif args[0] == 'reduce': reducedb(args[1])
-    elif args[0] == 'shrink': shrinkdb(args[1])
-    elif args[0] == 'trans_cedict': trans_cedict(args[1], args[2])
-    elif args[0] == 'trans_plain': trans_plain(args[1], args[2])
+        print '%s cmds params ...' % sys.argv[0]
+        for name in cmds: print '%s:%s' % (name, eval(name).__doc__)
+    else: eval(args[0])(*args[1:])
 
 if __name__ == '__main__': main()
