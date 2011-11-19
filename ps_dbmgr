@@ -64,6 +64,11 @@ def shrink(threshold):
     ddb.shrink(float(threshold))
     ddb.sync()
 
+def write_dict(words, outfile):
+    with open(outfile, 'w') as fo:
+        for word in list(words):
+            fo.write((u'%s 1\n' % word).encode('utf-8'))
+
 def trans_cedict(infile, outfile):
     words = set()
     with open(infile, 'r') as fi:
@@ -71,20 +76,17 @@ def trans_cedict(infile, outfile):
             if line.startswith('#'): continue
             word = line.split()[1].decode('utf-8')
             if len(word) > 1: words.add(word)
-    with open(outfile, 'w') as fo:
-        for word in list(words):
-            fo.write((u'%s 1\n' % word).encode('utf-8'))
+    write_dict(words, outfile)
 
 def trans_plain(infile, outfile):
     words = set()
     with open(infile, 'r') as fi:
         for line in fi:
             if line.startswith('#'): continue
-            word = line.decode('utf-8').strip()
+            try: word = line.decode('utf-8').strip()
+            except: continue
             if len(word) > 1: words.add(word)
-    with open(outfile, 'w') as fo:
-        for word in list(words):
-            fo.write((u'%s 1\n' % word).encode('utf-8'))
+    write_dict(words, outfile)
 
 cmds = ['create', 'importdb', 'exportdb', 'add', 'remove',
         'lookup', 'cals', 'stat', 'waterlevel', 'reduce', 'shrink',
