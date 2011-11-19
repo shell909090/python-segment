@@ -5,7 +5,7 @@
 @author: shell.xu
 '''
 import os, sys, time, traceback
-import chardet, segment
+import unicodedata, chardet, segment
 from os import path
 
 def readfile_chardet(filepath):
@@ -78,6 +78,7 @@ def frqstat(*filepathes):
     frq = {}
     for fp in filepathes: frqfile(fp, frq)
     for k, v in sorted(frq.items(), key = lambda x:x[1], reverse = True):
+        if unicodedata.category(k) != 'Lo': continue
         print k.encode('utf-8'), v
 
 def frqstats(basepath):
@@ -85,6 +86,7 @@ def frqstats(basepath):
     frq = {}
     walkdir(basepath, frqfile, frq)
     for k, v in sorted(frq.items(), key = lambda x:x[1], reverse = True):
+        if unicodedata.category(k) != 'Lo': continue
         print k.encode('utf-8'), v
 
 cmds = ['cut', 'cutshow', 'frqtrain', 'newtrain',
