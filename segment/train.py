@@ -14,8 +14,9 @@ class StatCutter(dyn.DynamicCutter):
         self.wordfrq = {}
 
     def parse(self, sentence):
-        for word, frq in self.split(sentence):
-            if frq != 0:
+        frq, rslt = self.split(sentence)
+        for word, tp in rslt:
+            if tp != 0:
                 if word not in self.wordfrq: self.wordfrq[word] = 0
                 self.wordfrq[word] += 1
                 yield word
