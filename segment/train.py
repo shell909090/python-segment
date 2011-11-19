@@ -26,6 +26,7 @@ class StatCutter(dyn.DynamicCutter):
 
     def train(self, sync = False):
         for k, v in self.wordfrq.items(): self.db.add(k, v)
+        self.db.normalize()
         if sync: self.db.sync()
 
     def join(self, stat):
