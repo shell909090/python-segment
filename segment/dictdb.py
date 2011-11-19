@@ -41,7 +41,8 @@ class dictdb(object):
             for k, v in vs.items():
                 d = u'%s %f\n' % (h.decode('utf-16') + k, v)
                 fo.write(d.encode('utf-8'))
-        for k, v in self.sdb.items(): fo.write('%s %f\n' % (k, v))
+        for k, v in self.sdb.items():
+            fo.write('%s %f\n' % (k.encode('utf-8'), v))
 
     def normalize(self):
         self.dbs = math.log(sum(self.values()))
