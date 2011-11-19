@@ -4,9 +4,11 @@
 @date: 2011-11-16
 @author: shell.xu
 '''
-import os, sys, time, traceback
+import os, sys, time, getopt, traceback
 import unicodedata, chardet, segment
 from os import path
+
+dbname = 'frq.db'
 
 def readfile_chardet(filepath):
     with open(filepath, 'r') as fi: data = fi.read()
@@ -24,33 +26,39 @@ def cutfile(filepath, cut):
     print 'process', filepath
     return list(cut.parse(readfile_chardet(filepath)))
 
+def cutstr(sentence):
+    ''' cutstr sentence : cut string and show out. '''
+    cut = segment.get_cutter(dbname)
+    segment.DynamicCutter.DEBUG = True
+    print '|'.join(cut.parse(sentence.decode('utf-8')))
+
 def cut(*filepathes):
     ''' cut filepath ... : cut a file and not print out. '''
-    cut = segment.get_cutter('frq.db')
+    cut = segment.get_cutter(dbname)
     for fp in filepathes: cutfile(fp, cut)
 
 def cutshow(*filepathes):
     ''' cutshow filepath ... : cut a file and print out. '''
-    cut = segment.get_cutter('frq.db')
+    cut = segment.get_cutter(dbname)
     for fp in filepathes: print '|'.join(cutfile(fp, cut)).encode('utf-8')
 
 def frqtrain(*filepathes):
     ''' frqtrain filepath ... : train frequency by files. '''
-    stat = segment.StatCutter(segment.dictdb('frq.db'), None)
+    stat = segment.StatCutter(segment.dictdb(dbname), None)
     cut = segment.StringCutter(stat)
     for fp in filepathes: cutfile(filepath, cut)
     stat.train()
 
 def frqtrains(basepath):
-    ''' frqtrain dirpath : train frequency by all files under dir. '''
-    stat = segment.StatCutter(segment.dictdb('frq.db'), None)
+    ''' frqtrains dirpath : train frequency by all files under dir. '''
+    stat = segment.StatCutter(segment.dictdb(dbname), None)
     cut = segment.StringCutter(stat)
     walkdir(basepath, cutfile, cut)
     stat.train(True)
 
 def newtrain(*filepathes):
     ''' newtrain filepath ... : train new words by files. '''
-    db = segment.dictdb('frq.db')
+    db = segment.dictdb(dbname)
     new = segment.NewCutter()
     cut = segment.StringCutter(segment.DynamicCutter(db, new))
     for fp in filepathes: cutfile(fp, cut)
@@ -59,7 +67,7 @@ def newtrain(*filepathes):
 
 def newtrains(basepath):
     ''' newtrains dirpath : train new words by all files under dir. '''
-    db = segment.dictdb('frq.db')
+    db = segment.dictdb(dbname)
     new = segment.NewCutter()
     cut = segment.StringCutter(segment.DynamicCutter(db, new))
     walkdir(basepath, cutfile, cut)
@@ -89,12 +97,17 @@ def frqstats(basepath):
         if unicodedata.category(k) != 'Lo': continue
         print k.encode('utf-8'), v
 
-cmds = ['cut', 'cutshow', 'frqtrain', 'newtrain',
-        'frqtrains', 'newtrains', 'frqstat', 'frqstats']
+cmds = ['cutstr', 'cut', 'cutshow', 'frqtrain', 'frqtrains',
+        'newtrain', 'newtrains', 'frqstat', 'frqstats']
 def main():
-    if len(sys.argv) == 1:
+    opts, args = getopt.getopt(sys.argv[1:], 'd:')
+    for opt, val in opts:
+        if opt == '-d':
+            global dbname
+            dbname = val
+    if len(args) == 0:
         print '%s cmds params ...' % sys.argv[0]
         for name in cmds: print '%s:%s' % (name, eval(name).__doc__)
-    else: eval(sys.argv[1])(*sys.argv[2:])
+    else: eval(args[0])(*args[1:])
 
 if __name__ == '__main__': main()

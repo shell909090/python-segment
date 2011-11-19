@@ -10,58 +10,75 @@ import segment
 dbname = 'frq.db'
 
 def create(filepath):
+    ''' create filepath : create db form txt dict. '''
     ddb = segment.dictdb()
     ddb.importtxt(filepath)
     ddb.savefile(dbname)
 
 def importdb(filepath):
+    ''' importdb filepath : import txt dict to db. '''
     ddb = segment.dictdb(dbname)
     ddb.importtxt(filepath)
     ddb.sync()
 
 def exportdb(filepath):
+    ''' exportdb filepath : export txt dict from db. '''
     ddb = segment.dictdb(dbname)
     with open(filepath, 'w') as fo: ddb.exporttxt(fo)
 
 def add(word, frq):
+    ''' add word frq : add a new word with frequency. '''
     ddb = segment.dictdb(dbname)
     ddb.add(word.decode('utf-8'), float(frq))
     ddb.sync()
 
 def remove(word):
+    ''' remove word : remove word. '''
     ddb = segment.dictdb(dbname)
     ddb.remove(word.decode('utf-8'))
     ddb.sync()
 
 def lookup(word):
+    ''' lookup word : lookup word from dict. '''
     ddb = segment.dictdb(dbname)
     word = word.decode('utf-8')
     if len(word) == 1: print word, ddb.gets(word)
     else: print word, ddb.get(word)
 
 def cals(word):
+    ''' cals word : calculate word frequency as char set. '''
     ddb = segment.dictdb(dbname)
     word = word.decode('utf-8')
     print word, ddb.cals(word)
 
 def stat():
+    ''' stat : dict db statistic. '''
     ddb = segment.dictdb(dbname)
     count, sumval = len(list(ddb.values())), sum(ddb.values())
     print 'count: %d\nsumvalue: %f' % (count, sumval)
     print 'avgvalue: %f\nmaxvalue: %f' % (sumval / count, max(ddb.values()))
 
 def waterlevel(wl):
+    ''' waterlevel wl : see how many word has higher frequency then waterlevel. '''
     ddb = segment.dictdb(dbname)
     print ddb.waterlevel(float(wl))
 
-def reduce(factor):
+def scale(factor):
+    ''' scale factor : scale dict with factor. '''
     ddb = segment.dictdb(dbname)
     ddb.reduce(float(factor))
     ddb.sync()
 
 def shrink(threshold):
+    ''' shrink threshold : remove words which has lower frequency then threshold. '''
     ddb = segment.dictdb(dbname)
     ddb.shrink(float(threshold))
+    ddb.sync()
+
+def flat():
+    ''' flat : set every word's frequency to 1. '''
+    ddb = segment.dictdb(dbname)
+    ddb.flat()
     ddb.sync()
 
 def write_dict(words, outfile):
@@ -69,28 +86,35 @@ def write_dict(words, outfile):
         for word in list(words):
             fo.write((u'%s 1\n' % word).encode('utf-8'))
 
-def trans_cedict(infile, outfile):
-    words = set()
+def read_file(infile, func, words):
     with open(infile, 'r') as fi:
         for line in fi:
             if line.startswith('#'): continue
-            word = line.split()[1].decode('utf-8')
-            if len(word) > 1: words.add(word)
+            word = func(line)
+            if word: words.add(word)
+
+def trans_cedict(infile, outfile):
+    ''' trans_cedict infile outfile : translate cedict infile to outfile. '''
+    words = set()
+    def __inner(line, words):
+        word = line.split()[1].decode('utf-8')
+        if len(word) > 1: return word
+    read_file(infile, __inner, words)
     write_dict(words, outfile)
 
 def trans_plain(infile, outfile):
+    ''' trans_plain infile outfile : translate plain infile to outfile. '''
     words = set()
-    with open(infile, 'r') as fi:
-        for line in fi:
-            if line.startswith('#'): continue
-            try: word = line.decode('utf-8').strip()
-            except: continue
-            if len(word) > 1: words.add(word)
+    def __inner(line, words):
+        try: word = line.decode('utf-8').strip()
+        except: return
+        if len(word) > 1: return word
+    read_file(infile, __inner, words)
     write_dict(words, outfile)
 
 cmds = ['create', 'importdb', 'exportdb', 'add', 'remove',
-        'lookup', 'cals', 'stat', 'waterlevel', 'reduce', 'shrink',
-        'trans_cedict', 'trans_plain']
+        'lookup', 'cals', 'stat', 'waterlevel', 'scale',
+        'shrink', 'flat', 'trans_cedict', 'trans_plain']
 def main():
     opts, args = getopt.getopt(sys.argv[1:], 'd:')
     for opt, val in opts:

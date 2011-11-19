@@ -7,13 +7,15 @@
 from dictdb import dictdb
 
 class DynamicCutter(object):
+    DEBUG = False
+
     def __init__(self, db, next):
         self.db, self.next, self.cache = db, next, {}
 
-    @staticmethod
-    def cmp_subtree(r1, r2):
+    @classmethod
+    def cmp_subtree(cls, r1, r2):
         if r1 is None: return True
-        # print '+', r1; print '-', r2
+        if cls.DEBUG: print '+', r1; print '-', r2
         c1 = [len(r) for r, i in r1[1] if i == 0]
         c2 = [len(r) for r, i in r2[1] if i == 0]
         s1, s2 = sum(c1), sum(c2)
@@ -65,7 +67,8 @@ class DynamicCutter(object):
         if pre_cut:
             best_rslt = (self.db.cals(pre_cut) + best_rslt[0],
                          [(pre_cut, 0),] + best_rslt[1])
-        # print '%s => %f %s' % (sentence, best_rslt[0], best_rslt[1])
+        if self.DEBUG:
+            print '%s => %f %s' % (sentence, best_rslt[0], best_rslt[1])
         return best_rslt
 
     def parse(self, sentence):

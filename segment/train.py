@@ -34,8 +34,6 @@ class StatCutter(dyn.DynamicCutter):
             self.wordfrq[k] = self.wordfrq.get(k, 0) + v
         return self
 
-# HIGHFRQ = u'的我了是不一这个在人来大么有你那就小说们到出\
-# 要着上好然可啊他过后还和为对吧与之'
 class NewCutter(object):
     def __init__(self, db):
         self.wordfrq, self.hifrqs = {}, db.hifrqs()

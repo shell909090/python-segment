@@ -69,7 +69,7 @@ class dictdb(object):
         return sum([len([v for v in vs.values() if v >= threshold])
                     for vs in self.db.values()])
 
-    def reduce(self, factor):
+    def scale(self, factor):
         for h, vs in self.db.items():
             for k, v in vs.items(): vs[k] = v * factor
         self.normalize()
@@ -81,6 +81,11 @@ class dictdb(object):
                                if v >= threshold])
             if len(self.db[h]) == 0: zero.append(h)
         for z in zero: del self.db[z]
+        self.normalize()
+
+    def flat(self):
+        for h, vs in self.db.items():
+            for k, v in vs.items(): vs[k] = 1
         self.normalize()
 
     def add(self, w, f):
