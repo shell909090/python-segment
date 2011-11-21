@@ -12,7 +12,7 @@ dbname = 'frq.db'
 
 def readfile_chardet(filepath):
     with open(filepath, 'r') as fi: data = fi.read()
-    enc = chardet.detect(data[:1200]).get('encoding', 'utf-8')
+    enc = chardet.detect(data[:120]).get('encoding', 'utf-8')
     if enc is None: enc = 'utf-8'
     return data.decode(enc, 'ignore')
 
