@@ -39,7 +39,7 @@ class dictdb(object):
     def exporttxt(self, fo):
         for h, vs in self.db.items():
             for k, v in vs.items():
-                d = u'%s %f\n' % (h.decode('utf-16') + k, v)
+                d = u'%s %f\n' % ((h+k).decode('utf-16'), v)
                 fo.write(d.encode('utf-8'))
         for k, v in self.sdb.items():
             fo.write('%s %f\n' % (k.encode('utf-8'), v))
@@ -90,29 +90,31 @@ class dictdb(object):
 
     def add(self, w, f):
         if len(w) < 2: return
-        h = w[:2].encode('utf-16')
+        w = w.encode('utf-16')
+        h, r = w[:4], w[4:]
         d = self.db.setdefault(h, {})
-        d[w[2:]] = d.get(w[2:], 0) + f
+        d[r] = d.get(r, 0) + f
 
     def remove(self, w):
         if len(w) < 2: return
-        h = w[:2].encode('utf-16')
+        w = w.encode('utf-16')
+        h, r = w[:4], w[4:]
         d = self.db.setdefault(h, {})
-        if w[2:] not in d: return
-        del d[w[2:]]
+        if r not in d: return
+        del d[r]
 
     def get(self, w):
         if len(w) < 2: return 0
-        h = w[:2].encode('utf-16')
+        w = w.encode('utf-16')
+        h, r = w[:4], w[4:]
         if h not in self.db: return 0
-        if w[2:] not in self.db[h]: return 0
-        return math.log(self.db[h][w[2:]]) - self.dbs
+        if r not in self.db[h]: return 0
+        return math.log(self.db[h][r]) - self.dbs
 
     def match(self, sentence):
         if len(sentence) < 2: return
-        hd, rest = sentence[:2], sentence[2:]
-        h = hd.encode('utf-16')
+        sentence = sentence.encode('utf-16')
+        h, r = sentence[:4], sentence[4:]
         if h not in self.db: return
-        d = self.db[h]
-        return [(hd + k, math.log(v) - self.dbs)
-                for k, v in d.items() if rest.startswith(k)]
+        return [((h + k).decode('utf-16'), math.log(v) - self.dbs)
+                for k, v in self.db[h].items() if r.startswith(k)]
