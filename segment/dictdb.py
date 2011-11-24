@@ -4,29 +4,18 @@
 @date: 2011-11-16
 @author: shell.xu
 '''
-import os, sys, math, marshal
+import math, marshal
+from dbase import dbase
 
-class dictdb(object):
-
-    def __init__(self, filepath = None):
-        self.close()
-        self.filepath = filepath
-        if self.filepath: self.loadfile(filepath)
+class dictdb(dbase):
 
     def save(self, fo):
         marshal.dump((self.db, self.sdb, self.dbs, self.sdbs), fo)
     def load(self, fi):
         self.db, self.sdb, self.dbs, self.sdbs = marshal.load(fi)
 
-    def sync(self):
-        if self.filepath: self.savefile(self.filepath)
     def close(self):
         self.db, self.sdb, self.dbs, self.sdbs = {}, {}, None, None
-
-    def savefile(self, filepath):
-        with open(filepath, 'w') as fo: self.save(fo)
-    def loadfile(self, filepath):
-        with open(filepath, 'r') as fi: self.load(fi)
 
     def importtxt(self, filepath):
         with open(filepath, 'r') as fi:
@@ -37,11 +26,11 @@ class dictdb(object):
         self.normalize()
 
     def exporttxt(self, fo):
-        for h, vs in self.db.items():
-            for k, v in vs.items():
+        for h, vs in self.db.iteritems():
+            for k, v in vs.iteritems():
                 d = u'%s %f\n' % (h + k, v)
                 fo.write(d.encode('utf-8'))
-        for k, v in self.sdb.items():
+        for k, v in self.sdb.iteritems():
             fo.write('%s %f\n' % (k.encode('utf-8'), v))
 
     def normalize(self):
@@ -54,39 +43,16 @@ class dictdb(object):
     def cals(self, ws):
         return sum(map(self.gets, ws))
 
-    def hifrqs(self):
-        return sorted(self.sdb.items(), lambda x:x[1], reverse = True)[40:]
+    def hifrqs(self, num):
+        return sorted(self.sdb.items(), lambda x:x[1], reverse = True)[num:]
 
     def items(self):
-        for h, vs in self.db.items():
-            for k, v in vs.items(): yield h + k, v
+        for h, vs in self.db.iteritems():
+            for k, v in vs.iteritems(): yield h + k, v
 
     def values(self):
         for vs in self.db.values():
             for i in vs.values(): yield i
-
-    def waterlevel(self, threshold):
-        return sum([len([v for v in vs.values() if v >= threshold])
-                    for vs in self.db.values()])
-
-    def scale(self, factor):
-        for h, vs in self.db.items():
-            for k, v in vs.items(): vs[k] = v * factor
-        self.normalize()
-
-    def shrink(self, threshold):
-        zero = []
-        for h, vs in self.db.items():
-            self.db[h] = dict([(k, v) for k, v in vs.items()
-                               if v >= threshold])
-            if len(self.db[h]) == 0: zero.append(h)
-        for z in zero: del self.db[z]
-        self.normalize()
-
-    def flat(self):
-        for h, vs in self.db.items():
-            for k, v in vs.items(): vs[k] = 1
-        self.normalize()
 
     def add(self, w, f):
         if len(w) < 2: return
@@ -113,4 +79,4 @@ class dictdb(object):
         h, r = sentence[:2], sentence[2:]
         if h not in self.db: return
         return [(h + k, math.log(v) - self.dbs)
-                for k, v in self.db[h].items() if r.startswith(k)]
+                for k, v in self.db[h].iteritems() if r.startswith(k)]

@@ -44,32 +44,30 @@ def cutshow(*filepathes):
 
 def frqtrain(*filepathes):
     ''' frqtrain filepath ... : train frequency by files. '''
-    stat = segment.StatCutter(segment.dictdb(dbname), None)
+    stat = segment.StatCutter(segment.dictdb(dbname))
     cut = segment.StringCutter(stat)
     for fp in filepathes: cutfile(filepath, cut)
     stat.train()
 
 def frqtrains(basepath):
     ''' frqtrains dirpath : train frequency by all files under dir. '''
-    stat = segment.StatCutter(segment.dictdb(dbname), None)
+    stat = segment.StatCutter(segment.dictdb(dbname))
     cut = segment.StringCutter(stat)
     walkdir(basepath, cutfile, cut)
     stat.train(True)
 
 def newtrain(*filepathes):
     ''' newtrain filepath ... : train new words by files. '''
-    db = segment.dictdb(dbname)
-    new = segment.NewCutter()
-    cut = segment.StringCutter(segment.DynamicCutter(db, new))
+    new = segment.NewCutter(segment.dictdb(dbname))
+    cut = segment.StringCutter(new)
     for fp in filepathes: cutfile(fp, cut)
     for word, frq in new.get_highfrq():
         print word.encode('utf-8'), frq
 
 def newtrains(basepath):
     ''' newtrains dirpath : train new words by all files under dir. '''
-    db = segment.dictdb(dbname)
-    new = segment.NewCutter()
-    cut = segment.StringCutter(segment.DynamicCutter(db, new))
+    new = segment.NewCutter(segment.dictdb(dbname))
+    cut = segment.StringCutter(new)
     walkdir(basepath, cutfile, cut)
     for word, frq in new.get_highfrq():
         print word.encode('utf-8'), frq

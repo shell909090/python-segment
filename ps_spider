@@ -51,11 +51,11 @@ def main():
     trains, spiders = [], []
     for i in xrange(10):
         if sys.argv[1] == 'new':
-            new = segment.NewCutter()
-            cut = segment.StringCutter(segment.DynamicCutter(db, new))
+            new = segment.NewCutter(db)
+            cut = segment.StringCutter(new)
             trains.append(new)
         else:
-            stat = segment.StatCutter(db, None)
+            stat = segment.StatCutter(db)
             cut = segment.StringCutter(stat)
             trains.append(stat)
         s = spider(cut, urlparse.urlparse(sys.argv[2]).netloc)

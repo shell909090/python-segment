@@ -9,8 +9,8 @@ from dictdb import dictdb
 class DynamicCutter(object):
     DEBUG = False
 
-    def __init__(self, db, next):
-        self.db, self.next, self.cache = db, next, {}
+    def __init__(self, db):
+        self.db, self.cache = db, {}
 
     @classmethod
     def cmp_subtree(cls, r1, r2):
@@ -54,7 +54,7 @@ class DynamicCutter(object):
                 best_rslt = temp_rslt
 
         # looking for choices not match in this position
-        maxlen = max([len(c) for c, f in cset])
+        maxlen = min([len(c) for c, f in cset])
         poc, cset = self.rfindc(rest, 1)
         while poc < maxlen and cset:
             r = self.split(rest[poc:])
@@ -73,9 +73,6 @@ class DynamicCutter(object):
 
     def parse(self, sentence):
         frq, rslt = self.split(sentence)
-        for word, tp in rslt:
-            if tp != 0 or not self.next: yield word
-            else:
-                for i in self.next.parse(word): yield i
+        for word, tp in rslt: yield word
 
     def stop(self): self.cache = {}

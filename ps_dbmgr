@@ -61,24 +61,35 @@ def stat():
 def waterlevel(wl):
     ''' waterlevel wl : see how many word has higher frequency then waterlevel. '''
     ddb = segment.dictdb(dbname)
-    print ddb.waterlevel(float(wl))
+    print len([for i in ddb.values() if i >= threshold])
 
 def scale(factor):
     ''' scale factor : scale dict with factor. '''
     ddb = segment.dictdb(dbname)
-    ddb.reduce(float(factor))
+    f = float(factor)
+    for h, vs in ddb.db.iteritems():
+        for k, v in vs.iteritems(): vs[k] = v * f
+    ddb.normalize()
     ddb.sync()
 
 def shrink(threshold):
     ''' shrink threshold : remove words which has lower frequency then threshold. '''
     ddb = segment.dictdb(dbname)
-    ddb.shrink(float(threshold))
+    t = float(threshold)
+    zero = []
+    for h, vs in ddb.db.iteritems():
+        ddb.db[h] = dict([(k, v) for k, v in vs.iteritems() if v >= t])
+        if len(ddb.db[h]) == 0: zero.append(h)
+    for z in zero: del ddb.db[z]
+    ddb.normalize()
     ddb.sync()
 
 def flat():
     ''' flat : set every word's frequency to 1. '''
     ddb = segment.dictdb(dbname)
-    ddb.flat()
+    for h, vs in ddb.db.iteritems():
+        for k, v in vs.iteritems(): vs[k] = 1
+    ddb.normalize()
     ddb.sync()
 
 def write_dict(words, outfile):

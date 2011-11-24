@@ -10,4 +10,4 @@ from dyn import DynamicCutter
 from train import StatCutter, NewCutter
 
 def get_cutter(filepath):
-    return StringCutter(DynamicCutter(dictdb(filepath), None))
+    return StringCutter(DynamicCutter(dictdb(filepath)))
