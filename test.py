@@ -58,7 +58,7 @@ class utCutter(unittest.TestCase):
 
 class utDynamic(unittest.TestCase):
     def setUp(self):
-        self.c = segment.DynamicCutter(db, None)
+        self.c = segment.DynamicCutter(db)
 
     def test1(self):
         self.assertEqual(list(self.c.parse(u'有机会见面')),

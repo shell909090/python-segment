@@ -1,0 +1,53 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+'''
+@date: 2011-11-24
+@author: shell.xu
+'''
+import os, sys, time, unicodedata
+import chardet, segment
+import clsifr
+from os import path
+
+segdbname = 'frq.db'
+dbname = 'classify.db'
+
+def walkdir(basepath, func, *params):
+    for base, dirs, files in os.walk(basepath):
+        for filename in files:
+            try: func(path.join(base, filename), *params)
+            except: traceback.print_exc()
+
+def train(hamdir, spamdir):
+    ''' train hamdir spamdir : train with ham and spam. '''
+    seg = segment.get_cutter(segdbname)
+    fisher = segment.Fisher()
+    fisher.set_segment(seg.parse)
+    walkdir(hamdir, fisher.trainfile, 'ham')
+    walkdir(spamdir, fisher.trainfile, 'spam')
+    fisher.savefile(dbname)
+
+def classify(*filepathes):
+    ''' classify filepath .. : classify file. '''
+    seg = segment.get_cutter(segdbname)
+    fisher = clsifr.Fisher(dbname)
+    fisher.set_segment(seg.parse)
+    for fp in filepathes:
+        fisher.classifyfile(fp, ['ham', 'spam'])
+
+cmds = ['train', 'classify',]
+def main():
+    opts, args = getopt.getopt(sys.argv[1:], 'd:f:')
+    for opt, val in opts:
+        if opt == '-d':
+            global segdbname
+            segdbname = val
+        elif opt == '-f':
+            global dbname
+            dbname = val
+    if len(args) == 0:
+        print '%s cmds params ...' % sys.argv[0]
+        for name in cmds: print '%s:%s' % (name, eval(name).__doc__)
+    else: eval(args[0])(*args[1:])
+
+if __name__ == '__main__': main()

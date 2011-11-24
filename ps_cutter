@@ -10,21 +10,11 @@ from os import path
 
 dbname = 'frq.db'
 
-def readfile_chardet(filepath):
-    with open(filepath, 'r') as fi: data = fi.read()
-    enc = chardet.detect(data[:120]).get('encoding', 'utf-8')
-    if enc is None: enc = 'utf-8'
-    return data.decode(enc, 'ignore')
-
 def walkdir(basepath, func, *params):
     for base, dirs, files in os.walk(basepath):
         for filename in files:
             try: func(path.join(base, filename), *params)
             except: traceback.print_exc()
-
-def cutfile(filepath, cut):
-    print 'process', filepath
-    return list(cut.parse(readfile_chardet(filepath)))
 
 def cutstr(sentence):
     ''' cutstr sentence : cut string and show out. '''
@@ -35,32 +25,32 @@ def cutstr(sentence):
 def cut(*filepathes):
     ''' cut filepath ... : cut a file and not print out. '''
     cut = segment.get_cutter(dbname)
-    for fp in filepathes: cutfile(fp, cut)
+    for fp in filepathes: list(cut.parsefile(fp))
 
 def cutshow(*filepathes):
     ''' cutshow filepath ... : cut a file and print out. '''
     cut = segment.get_cutter(dbname)
-    for fp in filepathes: print '|'.join(cutfile(fp, cut)).encode('utf-8')
+    for fp in filepathes: print '|'.join(cut.parsefile(fp)).encode('utf-8')
 
 def frqtrain(*filepathes):
     ''' frqtrain filepath ... : train frequency by files. '''
     stat = segment.StatCutter(segment.dictdb(dbname))
     cut = segment.StringCutter(stat)
-    for fp in filepathes: cutfile(filepath, cut)
+    for fp in filepathes: cut.parsefile(filepath)
     stat.train()
 
 def frqtrains(basepath):
     ''' frqtrains dirpath : train frequency by all files under dir. '''
     stat = segment.StatCutter(segment.dictdb(dbname))
     cut = segment.StringCutter(stat)
-    walkdir(basepath, cutfile, cut)
+    walkdir(basepath, cut.paesefile)
     stat.train(True)
 
 def newtrain(*filepathes):
     ''' newtrain filepath ... : train new words by files. '''
     new = segment.NewCutter(segment.dictdb(dbname))
     cut = segment.StringCutter(new)
-    for fp in filepathes: cutfile(fp, cut)
+    for fp in filepathes: cut.paesefile(fp)
     for word, frq in new.get_highfrq():
         print word.encode('utf-8'), frq
 
@@ -68,13 +58,13 @@ def newtrains(basepath):
     ''' newtrains dirpath : train new words by all files under dir. '''
     new = segment.NewCutter(segment.dictdb(dbname))
     cut = segment.StringCutter(new)
-    walkdir(basepath, cutfile, cut)
+    walkdir(basepath, cut.paesefile)
     for word, frq in new.get_highfrq():
         print word.encode('utf-8'), frq
 
 def frqfile(filepath, frq):
     print 'process', filepath
-    data = readfile_chardet(filepath)
+    data = segment.readfile_cd(filepath)
     for i in data:
         if i not in frq: frq[i] = 0
         frq[i] += 1

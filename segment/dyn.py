@@ -4,6 +4,7 @@
 @date: 2011-11-16
 @author: shell.xu
 '''
+from dbase import readfile_cd
 from dictdb import dictdb
 
 class DynamicCutter(object):
@@ -34,6 +35,7 @@ class DynamicCutter(object):
         if sentence not in self.cache:
             self.cache[sentence] = self._split(sentence)
         return self.cache[sentence]
+    def stop(self): self.cache = {}
 
     def _split(self, sentence):
         if not sentence: return 0, []
@@ -75,4 +77,6 @@ class DynamicCutter(object):
         frq, rslt = self.split(sentence)
         for word, tp in rslt: yield word
 
-    def stop(self): self.cache = {}
+    def parsefile(self, filepath):
+        print 'process', filepath
+        return self.parse(readfile_cd(filepath))
