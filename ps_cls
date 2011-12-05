@@ -4,9 +4,9 @@
 @date: 2011-11-24
 @author: shell.xu
 '''
-import os, sys, time, unicodedata
+import os, sys, time, getopt
+import traceback, unicodedata
 import chardet, segment
-import clsifr
 from os import path
 
 segdbname = 'frq.db'
@@ -24,7 +24,7 @@ def create_fisher():
     fisher.savefile(dbname)
 
 def train_fisher(hamdir, spamdir):
-    ''' train hamdir spamdir : train fisher with ham and spam. '''
+    ''' train_fisher hamdir spamdir : train fisher with ham and spam. '''
     seg = segment.get_cutter(segdbname)
     fisher = segment.Fisher(dbname)
     fisher.set_segment(seg.parse)
@@ -33,9 +33,9 @@ def train_fisher(hamdir, spamdir):
     fisher.sync()
 
 def classify_fisher(*filepathes):
-    ''' classify filepath .. : classify file. '''
+    ''' classify_fisher filepath .. : classify file. '''
     seg = segment.get_cutter(segdbname)
-    fisher = clsifr.Fisher(dbname)
+    fisher = segment.Fisher(dbname)
     fisher.set_segment(seg.parse)
     for fp in filepathes:
         fisher.classifyfile(fp, ['ham', 'spam'])

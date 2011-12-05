@@ -62,7 +62,7 @@ class Fisher(dbase):
             r.add(t)
         return r
 
-    def train(self, data, cls): self.add(cls, self.proc_text(data))
+    def train(self, data, cls): self.add(self.proc_text(data), cls)
 
     def trainfile(self, filepath, cls):
         print 'process', cls, filepath
