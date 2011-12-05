@@ -57,11 +57,12 @@ def stat():
     count, sumval = len(list(ddb.values())), sum(ddb.values())
     print 'count: %d\nsumvalue: %f' % (count, sumval)
     print 'avgvalue: %f\nmaxvalue: %f' % (sumval / count, max(ddb.values()))
+    print 'root: %d\navgdict: %f' % (len(ddb.db), float(count) / len(ddb.db))
 
 def waterlevel(wl):
     ''' waterlevel wl : see how many word has higher frequency then waterlevel. '''
     ddb = segment.dictdb(dbname)
-    print len([for i in ddb.values() if i >= threshold])
+    print len([i for i in ddb.values() if i >= threshold])
 
 def scale(factor):
     ''' scale factor : scale dict with factor. '''

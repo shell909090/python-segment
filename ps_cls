@@ -18,16 +18,21 @@ def walkdir(basepath, func, *params):
             try: func(path.join(base, filename), *params)
             except: traceback.print_exc()
 
-def train(hamdir, spamdir):
-    ''' train hamdir spamdir : train with ham and spam. '''
-    seg = segment.get_cutter(segdbname)
+def create_fisher():
+    ''' create : create fisher db. '''
     fisher = segment.Fisher()
+    fisher.savefile(dbname)
+
+def train_fisher(hamdir, spamdir):
+    ''' train hamdir spamdir : train fisher with ham and spam. '''
+    seg = segment.get_cutter(segdbname)
+    fisher = segment.Fisher(dbname)
     fisher.set_segment(seg.parse)
     walkdir(hamdir, fisher.trainfile, 'ham')
     walkdir(spamdir, fisher.trainfile, 'spam')
-    fisher.savefile(dbname)
+    fisher.sync()
 
-def classify(*filepathes):
+def classify_fisher(*filepathes):
     ''' classify filepath .. : classify file. '''
     seg = segment.get_cutter(segdbname)
     fisher = clsifr.Fisher(dbname)
@@ -35,7 +40,7 @@ def classify(*filepathes):
     for fp in filepathes:
         fisher.classifyfile(fp, ['ham', 'spam'])
 
-cmds = ['train', 'classify',]
+cmds = ['create_fisher', 'train_fisher', 'classify_fisher',]
 def main():
     opts, args = getopt.getopt(sys.argv[1:], 'd:f:')
     for opt, val in opts:
