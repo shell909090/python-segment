@@ -7,8 +7,7 @@ Standards-Version: 3.9.2
 Homepage: http://shell909090.com/
 
 Package: python-segment
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-chardet
-Suggests: python-html2text
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
 Description: segmentation library written by Python
  segmentation library written by Python. You can train youself's dict.
