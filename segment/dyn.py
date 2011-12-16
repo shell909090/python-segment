@@ -76,3 +76,6 @@ class DynamicCutter(CutterBase):
     def parse(self, sentence):
         frq, rslt = self.split(sentence)
         for word, tp in rslt: yield word
+
+    def parsetp(self, sentence):
+        return self.split(sentence)[1]

@@ -58,3 +58,26 @@ class StringCutter(CutterBase):
                 if self.next: self.next.stop()
                 yield stc[s:e]
             s = e
+
+    def parsetp(self, stc):
+        s, l = 0, len(stc)
+        while s < l:
+            t = chrcat(stc[s])
+            if t == 'Lo':
+                e = split_chinese(stc, s)
+                if not self.next: yield stc[s:e], 0
+                else:
+                    for i in self.next.parsetp(stc[s:e]): yield i
+            elif t == 'Nd':
+                e = split_number(stc, s)
+                if self.next: self.next.stop()
+                yield stc[s:e], 2
+            elif t in ['Ll', 'Lu']:
+                e = split_english(stc, s)
+                if self.next: self.next.stop()
+                yield stc[s:e], 2
+            else:
+                e = split_punct(stc, s)
+                if self.next: self.next.stop()
+                yield stc[s:e], 2
+            s = e
