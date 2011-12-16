@@ -4,6 +4,7 @@
 @date: 2011-11-16
 @author: shell.xu
 '''
+from dbase import *
 import unicodedata
 chrcat = unicodedata.category
 
@@ -32,7 +33,7 @@ def split_number(stc, s):
         if t != 'Nd' and stc[e] not in u',.': return e
     return len(stc)
 
-class StringCutter(object):
+class StringCutter(CutterBase):
     def __init__(self, next): self.next = next
 
     def parse(self, stc):

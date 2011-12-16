@@ -5,8 +5,8 @@
 @author: shell.xu
 '''
 import chardet
-class dbase(object):
 
+class dbase(object):
     def __init__(self, filepath = None):
         self.close()
         self.filepath = filepath
@@ -26,3 +26,9 @@ def readfile_cd(filepath):
     else: enc = chardet.detect(data[:120])['encoding']
     if enc is None: enc = 'utf-8'
     return data.decode(enc, 'ignore')
+
+class CutterBase(object):
+    def parsefile(self, filepath):
+        print 'process', filepath
+        return self.parse(readfile_cd(filepath))
+

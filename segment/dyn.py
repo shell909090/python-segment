@@ -4,10 +4,10 @@
 @date: 2011-11-16
 @author: shell.xu
 '''
-from dbase import readfile_cd
+from dbase import *
 from dictdb import dictdb
 
-class DynamicCutter(object):
+class DynamicCutter(CutterBase):
     DEBUG = False
 
     def __init__(self, db):
@@ -76,7 +76,3 @@ class DynamicCutter(object):
     def parse(self, sentence):
         frq, rslt = self.split(sentence)
         for word, tp in rslt: yield word
-
-    def parsefile(self, filepath):
-        print 'process', filepath
-        return self.parse(readfile_cd(filepath))
