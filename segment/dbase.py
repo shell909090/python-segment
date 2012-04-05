@@ -16,9 +16,9 @@ class dbase(object):
         if self.filepath: self.savefile(self.filepath)
 
     def savefile(self, filepath):
-        with open(filepath, 'w') as fo: self.save(fo)
+        with open(filepath, 'wb') as fo: self.save(fo)
     def loadfile(self, filepath):
-        with open(filepath, 'r') as fi: self.load(fi)
+        with open(filepath, 'rb') as fi: self.load(fi)
 
 def readfile_cd(filepath):
     with open(filepath, 'r') as fi: data = fi.read()
