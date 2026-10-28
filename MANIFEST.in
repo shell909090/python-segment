@@ -1,0 +1,2 @@
+include dict.txt.gz INSTALL.md test.py test_migration.py example.py
+recursive-include doc *.md

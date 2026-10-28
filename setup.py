@@ -1,12 +1,5 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-'''
-@date: 2010-10-02
-@author: shell.xu
-'''
-from distutils.core import setup
+#!/usr/bin/env python3
+"""Compatibility entry point; project metadata lives in pyproject.toml."""
+from setuptools import setup
 
-setup(name = 'segment', version = '1.0', url = 'http://shell909090.com/',
-      author = 'Shell.E.Xu', author_email = 'shell909090@gmail.com',
-      description = 'segmentation library written by python',
-      packages = ['segment',], scripts=['ps_cutter', 'ps_dbmgr', 'ps_cls'])
+setup()

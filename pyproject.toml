@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "segment"
+version = "1.0"
+description = "Chinese segmentation library with dictionary training and text classification"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "Shell.E.Xu", email = "shell909090@gmail.com"}]
+license = "MIT"
+dependencies = ["chardet>=5.2"]
+
+[project.optional-dependencies]
+spider = ["html2text>=2024.2.26", "lxml>=5.3"]
+
+[tool.setuptools]
+packages = ["segment"]
+script-files = ["ps_cutter", "ps_dbmgr", "ps_cls", "ps_spider"]

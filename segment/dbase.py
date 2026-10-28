@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @date: 2011-11-24
@@ -21,7 +21,7 @@ class dbase(object):
         with open(filepath, 'rb') as fi: self.load(fi)
 
 def readfile_cd(filepath):
-    with open(filepath, 'r') as fi: data = fi.read()
+    with open(filepath, 'rb') as fi: data = fi.read()
     if len(data) < 120: enc = chardet.detect(data)['encoding']
     else: enc = chardet.detect(data[:120])['encoding']
     if enc is None: enc = 'utf-8'
@@ -29,6 +29,6 @@ def readfile_cd(filepath):
 
 class CutterBase(object):
     def parsefile(self, filepath):
-        print 'process', filepath
+        print('process', filepath)
         return self.parse(readfile_cd(filepath))
 

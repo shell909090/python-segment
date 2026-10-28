@@ -1,54 +1,55 @@
-# 准备 #
+# 安装与运行
 
-如果你不准备进行安装部署，可以跳过安装和打包这两步。如果你打算使用cutter工具，请安装chardet。如果你打算使用spider工具，请安装html2text。
+需要 Python 3.11 或更高版本和 uv。
 
-# 获得代码 #
+```sh
+uv sync
+# 如需网页采集训练工具 ps_spider：
+uv sync --extra spider
+```
 
-你可以使用以下代码，直接从版本库中复制一个可用版本出来。
+运行爬虫时使用 `uv run --extra spider ps_spider ...`，确保可选依赖已安装。
 
-	hg clone https://shell909090@code.google.com/p/python-segment/
+# 词典生成
 
-或者可以从这里下载一个最新版本的包。
+可直接导入项目附带的 gzip 词典，无需解压：
 
-# 直接安装 #
+```sh
+uv run ps_dbmgr create dict.txt.gz
+uv run ps_dbmgr stat
+uv run ps_cutter cutstr '我爱北京天安门'
+uv run ps_cutter cutshow test.txt
+uv run python example.py
+```
 
-使用setup.py直接安装。
+默认词典为当前目录的 `frq.db`；可通过 `-d` 指定路径。
+旧 Python 2 的 marshal 数据库请从文本词典重新生成。
 
-# debian打包 #
+# 代码使用
 
-debuild直接打包。
+```python
+import segment
 
-# 词典生成 #
+cut = segment.get_cutter('frq.db')
+print(list(cut.parse('我爱北京天安门')))
+```
 
-按照如下方式，使用dbmgr生成frq.db文件。
+`parse()` 返回生成器，迭代后才执行分词或训练。
 
-	gunzip dict.tar.gz
-	./ps_dbmgr create dict.txt
+# 分类器
 
-你可以看到生成了frq.db，这是词典的默认文件名。注意，词典文件的格式和具体的版本有关，换用版本后最好重新生成词典。
+```sh
+uv run ps_cls create_fisher
+uv run ps_cls train_fisher ham/ spam/
+uv run ps_cls classify_fisher example.txt
+```
 
-# 命令行使用 #
+# 检查和构建
 
-假定有一个文本文件，test.txt，里面内容是中文平文本，编码任意。
+```sh
+uv run python -m unittest discover -v
+uv build
+```
 
-	./ps_cutter cutshow test.txt
-
-cutter会自动推测编码。
-
-# 代码使用 #
-
-假如当前有一个frq.db词库。
-
-	import segment
-	cut = segment.get_cutter('frq.db')
-	print list(cut.parse(u'工信处女干事每月经过下属科室都要亲口交代24口交换机等技术性器件的安装工作'))
-
-注意，仅仅使用parse是不会进行分词的，因为parse返回的是一个生成器。
-
-# 分类器命令行例子 #
-
-假定有一个spam目录，一个ham目录，一个example.txt文件。以下过程可以分析example.txt归属于哪个分类。
-
-	./ps_cls create_fisher
-	./ps_cls train_fisher hamdir/ spam/
-	./ps_cls classify_fisher example.txt
+测试直接读取附带词典，不依赖工作目录中已生成的数据库。
+Debian 打包使用 Python 3、dh-python 和 pybuild，需要先安装 debian/control 中的构建依赖。

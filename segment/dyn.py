@@ -1,11 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @date: 2011-11-16
 @author: shell.xu
 '''
-from dbase import *
-from dictdb import dictdb
+from .dbase import *
+from .dictdb import dictdb
 
 class DynamicCutter(CutterBase):
     DEBUG = False
@@ -16,7 +16,7 @@ class DynamicCutter(CutterBase):
     @classmethod
     def cmp_subtree(cls, r1, r2):
         if r1 is None: return True
-        if cls.DEBUG: print '+', r1; print '-', r2
+        if cls.DEBUG: print('+', r1); print('-', r2)
         c1 = [len(r) for r, i in r1[1] if i == 0]
         c2 = [len(r) for r, i in r2[1] if i == 0]
         s1, s2 = sum(c1), sum(c2)
@@ -26,7 +26,7 @@ class DynamicCutter(CutterBase):
         return r1[0] < r2[0]
 
     def rfindc(self, sentence, start_pos = 0):
-        for i in xrange(start_pos, len(sentence)):
+        for i in range(start_pos, len(sentence)):
             cset = self.db.match(sentence[i:])
             if cset: return i, cset
         return -1, []
@@ -70,7 +70,7 @@ class DynamicCutter(CutterBase):
             best_rslt = (self.db.cals(pre_cut) + best_rslt[0],
                          [(pre_cut, 0),] + best_rslt[1])
         if self.DEBUG:
-            print '%s => %f %s' % (sentence, best_rslt[0], best_rslt[1])
+            print('%s => %f %s' % (sentence, best_rslt[0], best_rslt[1]))
         return best_rslt
 
     def parse(self, sentence):

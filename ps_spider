@@ -1,15 +1,15 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @date: 2011-11-18
 @author: shell.xu
 '''
-import os, sys, urllib
-import threading, urlparse, traceback
+import os, sys, urllib.request, urllib.parse, urllib.error
+import threading, urllib.parse, traceback
 import html2text, chardet
-from StringIO import StringIO
+from io import StringIO
 from lxml import etree, html
-sys.path.insert(0, '../')
+from functools import reduce
 import segment
 
 queue = []
@@ -26,14 +26,14 @@ class spider(threading.Thread):
             except: traceback.print_exc()
 
     def proc(self, job):
-        if urlparse.urlparse(job[0]).netloc != self.fix: return
-        print 'process %s' % job[0]
-        httpfile = urllib.urlopen(job[0])
-        content_type = httpfile.info()['Content-Type']
-        if content_type not in ['text/html', 'text/plain']: return
-        data = httpfile.read()
-        enc = chardet.detect(data[1200:]).get('encoding', 'utf-8')
-        if enc is None: enc = 'utf-8'
+        if urllib.parse.urlparse(job[0]).netloc != self.fix: return
+        print('process %s' % job[0])
+        with urllib.request.urlopen(job[0], timeout=30) as httpfile:
+            content_type = httpfile.info().get_content_type()
+            if content_type not in ['text/html', 'text/plain']: return
+            data = httpfile.read()
+            enc = httpfile.info().get_content_charset()
+        enc = enc or chardet.detect(data[:1200]).get('encoding') or 'utf-8'
         data = data.decode(enc, 'ignore')
         if content_type == 'text/html':
             if job[1] > 0:
@@ -49,7 +49,7 @@ def main():
     db = segment.dictdb('frq.db')
     queue.append((sys.argv[2], 2))
     trains, spiders = [], []
-    for i in xrange(10):
+    for i in range(10):
         if sys.argv[1] == 'new':
             new = segment.NewCutter(db)
             cut = segment.StringCutter(new)
@@ -58,14 +58,14 @@ def main():
             stat = segment.StatCutter(db)
             cut = segment.StringCutter(stat)
             trains.append(stat)
-        s = spider(cut, urlparse.urlparse(sys.argv[2]).netloc)
+        s = spider(cut, urllib.parse.urlparse(sys.argv[2]).netloc)
         s.start()
         spiders.append(s)
     for s in spiders: s.join()
     t = reduce(lambda x, y: x.join(y), trains)
     if sys.argv[1] == 'new':
         for k, v in t.get_highfrq():
-            print k.encode('utf-8'), v
+            print(k, v)
     else: t.train(True)
 
 if __name__ == '__main__': main()

@@ -1,26 +1,26 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @date: 2011-11-16
 @author: shell.xu
 '''
-from dbase import *
+from .dbase import *
 import unicodedata
 chrcat = unicodedata.category
 
 punct_set = set(['Ll', 'Lu', 'Lo', 'Nd'])
 def split_punct(stc, s):
-    for e in xrange(s, len(stc)):
+    for e in range(s, len(stc)):
         if chrcat(stc[e]) in punct_set: return e
     return len(stc)
 
 def split_chinese(stc, s):
-    for e in xrange(s, len(stc)):
+    for e in range(s, len(stc)):
         if chrcat(stc[e]) != 'Lo': return e
     return len(stc)
 
 def split_english(stc, s):
-    for e in xrange(s, len(stc)):
+    for e in range(s, len(stc)):
         t = chrcat(stc[e])
         if t not in ['Lu', 'Ll'] and stc[e] not in '-.\'': return e
         if e != s and pre_type == 'Ll' and t == 'Lu': return e
@@ -28,9 +28,9 @@ def split_english(stc, s):
     return len(stc)
 
 def split_number(stc, s):
-    for e in xrange(s, len(stc)):
+    for e in range(s, len(stc)):
         t = chrcat(stc[e])
-        if t != 'Nd' and stc[e] not in u',.': return e
+        if t != 'Nd' and stc[e] not in ',.': return e
     return len(stc)
 
 class StringCutter(CutterBase):

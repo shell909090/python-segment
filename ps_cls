@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @date: 2011-11-24
@@ -51,8 +51,9 @@ def main():
             global dbname
             dbname = val
     if len(args) == 0:
-        print '%s cmds params ...' % sys.argv[0]
-        for name in cmds: print '%s:%s' % (name, eval(name).__doc__)
-    else: eval(args[0])(*args[1:])
+        print('%s cmds params ...' % sys.argv[0])
+        for name in cmds: print('%s:%s' % (name, globals()[name].__doc__))
+    elif args[0] in cmds: globals()[args[0]](*args[1:])
+    else: raise SystemExit('Unknown command: ' + args[0])
 
 if __name__ == '__main__': main()

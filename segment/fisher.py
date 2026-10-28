@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @date: 2011-11-15
@@ -6,7 +6,7 @@
 '''
 import os, sys, math, marshal
 import unicodedata
-from dbase import dbase, readfile_cd
+from .dbase import dbase, readfile_cd
 
 def fixinit(mid):
     def getfunc(func):
@@ -37,7 +37,7 @@ class Fisher(dbase):
     def invchi2(chi, df):
         m = chi / 2.0
         s = term = math.exp(-m)
-        for i in xrange(1, df//2):
+        for i in range(1, df//2):
             term *= m / i
             s += term
         return min(s, 1)
@@ -49,8 +49,7 @@ class Fisher(dbase):
         return float(frq.get(cls, 0)) / sum(frq.values())
 
     def prob(self, terms, cls):
-        fs = sum(map(lambda t: math.log(self.cprob(t, cls)),
-                     terms))
+        fs = sum([math.log(self.cprob(t, cls)) for t in terms])
         return self.invchi2(-2 * fs, len(terms) * 2)
 
     def proc_text(self, data):
@@ -65,14 +64,14 @@ class Fisher(dbase):
     def train(self, data, cls): self.add(self.proc_text(data), cls)
 
     def trainfile(self, filepath, cls):
-        print 'process', cls, filepath
+        print('process', cls, filepath)
         return self.train(readfile_cd(filepath), cls)
 
     def classify(self, data, clses):
         terms = self.proc_text(data)
         for cls in clses:
-            print '\t', cls, self.prob(terms, cls)
+            print('\t', cls, self.prob(terms, cls))
 
     def classifyfile(self, filepath, clses):
-        print 'classify', filepath
+        print('classify', filepath)
         return self.classify(readfile_cd(filepath), clses)

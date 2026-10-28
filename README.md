@@ -2,6 +2,18 @@
 
 python-segment是一个纯python实现的分词库，他的目标是提供一个可用的，完善的分词系统和训练环境，包括一个可用的词典。
 
+# 运行环境 #
+
+现使用 Python 3.11+ 和 uv 管理依赖。`uv sync` 安装核心功能；
+`uv sync --extra spider` 安装网页采集所需的可选依赖。
+使用方法见 [INSTALL.md](INSTALL.md)。
+
+```sh
+uv run ps_dbmgr create dict.txt.gz
+uv run ps_cutter cutstr '我爱北京天安门'
+uv run python -m unittest discover -v
+```
+
 # 词典说明 #
 
 python-segment的词典是带词频无词性词典，程序基于剪枝和词频概率工作，不考虑词性，不考虑马尔可夫链。词典含两部分内容，单字词频和词组词频。两者的统计和使用是分离的。

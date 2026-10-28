@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @date: 2011-11-16
@@ -20,7 +20,7 @@ def cutstr(sentence):
     ''' cutstr sentence : cut string and show out. '''
     cut = segment.get_cutter(dbname)
     segment.DynamicCutter.DEBUG = True
-    print '|'.join(cut.parse(sentence.decode('utf-8')))
+    print('|'.join(cut.parse(sentence)))
 
 def cut(*filepathes):
     ''' cut filepath ... : cut a file and not print out. '''
@@ -30,40 +30,40 @@ def cut(*filepathes):
 def cutshow(*filepathes):
     ''' cutshow filepath ... : cut a file and print out. '''
     cut = segment.get_cutter(dbname)
-    for fp in filepathes: print '|'.join(cut.parsefile(fp)).encode('utf-8')
+    for fp in filepathes: print('|'.join(cut.parsefile(fp)))
 
 def frqtrain(*filepathes):
     ''' frqtrain filepath ... : train frequency by files. '''
     stat = segment.StatCutter(segment.dictdb(dbname))
     cut = segment.StringCutter(stat)
-    for fp in filepathes: cut.parsefile(filepath)
-    stat.train()
+    for fp in filepathes: list(cut.parsefile(fp))
+    stat.train(True)
 
 def frqtrains(basepath):
     ''' frqtrains dirpath : train frequency by all files under dir. '''
     stat = segment.StatCutter(segment.dictdb(dbname))
     cut = segment.StringCutter(stat)
-    walkdir(basepath, cut.paesefile)
+    walkdir(basepath, lambda fp: list(cut.parsefile(fp)))
     stat.train(True)
 
 def newtrain(*filepathes):
     ''' newtrain filepath ... : train new words by files. '''
     new = segment.NewCutter(segment.dictdb(dbname))
     cut = segment.StringCutter(new)
-    for fp in filepathes: cut.paesefile(fp)
+    for fp in filepathes: list(cut.parsefile(fp))
     for word, frq in new.get_highfrq():
-        print word.encode('utf-8'), frq
+        print(word, frq)
 
 def newtrains(basepath):
     ''' newtrains dirpath : train new words by all files under dir. '''
     new = segment.NewCutter(segment.dictdb(dbname))
     cut = segment.StringCutter(new)
-    walkdir(basepath, cut.paesefile)
+    walkdir(basepath, lambda fp: list(cut.parsefile(fp)))
     for word, frq in new.get_highfrq():
-        print word.encode('utf-8'), frq
+        print(word, frq)
 
 def frqfile(filepath, frq):
-    print 'process', filepath
+    print('process', filepath)
     data = segment.readfile_cd(filepath)
     for i in data:
         if i not in frq: frq[i] = 0
@@ -73,17 +73,17 @@ def frqstat(*filepathes):
     ''' frqstat filepath ... : statistics frequency of char in files. '''
     frq = {}
     for fp in filepathes: frqfile(fp, frq)
-    for k, v in sorted(frq.items(), key = lambda x:x[1], reverse = True):
+    for k, v in sorted(list(frq.items()), key = lambda x:x[1], reverse = True):
         if unicodedata.category(k) != 'Lo': continue
-        print k.encode('utf-8'), v
+        print(k, v)
 
 def frqstats(basepath):
     ''' frqstats dirpath : statistics frequency in all files under dir. '''
     frq = {}
     walkdir(basepath, frqfile, frq)
-    for k, v in sorted(frq.items(), key = lambda x:x[1], reverse = True):
+    for k, v in sorted(list(frq.items()), key = lambda x:x[1], reverse = True):
         if unicodedata.category(k) != 'Lo': continue
-        print k.encode('utf-8'), v
+        print(k, v)
 
 cmds = ['cutstr', 'cut', 'cutshow', 'frqtrain', 'frqtrains',
         'newtrain', 'newtrains', 'frqstat', 'frqstats']
@@ -94,8 +94,9 @@ def main():
             global dbname
             dbname = val
     if len(args) == 0:
-        print '%s cmds params ...' % sys.argv[0]
-        for name in cmds: print '%s:%s' % (name, eval(name).__doc__)
-    else: eval(args[0])(*args[1:])
+        print('%s cmds params ...' % sys.argv[0])
+        for name in cmds: print('%s:%s' % (name, globals()[name].__doc__))
+    elif args[0] in cmds: globals()[args[0]](*args[1:])
+    else: raise SystemExit('Unknown command: ' + args[0])
 
 if __name__ == '__main__': main()

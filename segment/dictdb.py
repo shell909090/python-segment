@@ -1,11 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @date: 2011-11-16
 @author: shell.xu
 '''
 import math, marshal
-from dbase import dbase
+import gzip
+from .dbase import dbase
 
 class dictdb(dbase):
 
@@ -18,24 +19,26 @@ class dictdb(dbase):
         self.db, self.sdb, self.dbs, self.sdbs = {}, {}, None, None
 
     def importtxt(self, filepath):
-        with open(filepath, 'r') as fi:
+        opener = gzip.open if str(filepath).endswith('.gz') else open
+        with opener(filepath, 'rt', encoding='utf-8') as fi:
             for line in fi:
-                i = line.strip().decode('utf-8').split()
+                i = line.strip().split()
+                if not i: continue
                 if len(i[0]) == 1: self.sdb[i[0]] = float(i[1])
                 else: self.add(i[0], float(i[1]))
         self.normalize()
 
     def exporttxt(self, fo):
-        for h, vs in self.db.iteritems():
-            for k, v in vs.iteritems():
-                d = u'%s %f\n' % (h + k, v)
-                fo.write(d.encode('utf-8'))
-        for k, v in self.sdb.iteritems():
-            fo.write('%s %f\n' % (k.encode('utf-8'), v))
+        for h, vs in self.db.items():
+            for k, v in vs.items():
+                d = '%s %f\n' % (h + k, v)
+                fo.write(d)
+        for k, v in self.sdb.items():
+            fo.write('%s %f\n' % (k, v))
 
     def normalize(self):
-        self.dbs = math.log(sum(self.values()))
-        self.sdbs = math.log(sum(self.sdb.values()))
+        self.dbs = math.log(sum(self.values()) or 1)
+        self.sdbs = math.log(sum(self.sdb.values()) or 1)
 
     def gets(self, w):
         return math.log(self.sdb.get(w, 1)) - self.sdbs
@@ -44,15 +47,15 @@ class dictdb(dbase):
         return sum(map(self.gets, ws))
 
     def hifrqs(self, num):
-        return sorted(self.sdb.items(), lambda x:x[1], reverse = True)[num:]
+        return ''.join(k for k, v in sorted(self.sdb.items(), key=lambda x: x[1], reverse=True)[:num])
 
     def items(self):
-        for h, vs in self.db.iteritems():
-            for k, v in vs.iteritems(): yield h + k, v
+        for h, vs in self.db.items():
+            for k, v in vs.items(): yield h + k, v
 
     def values(self):
-        for vs in self.db.values():
-            for i in vs.values(): yield i
+        for vs in list(self.db.values()):
+            for i in list(vs.values()): yield i
 
     def add(self, w, f):
         if len(w) < 2: return
@@ -79,4 +82,4 @@ class dictdb(dbase):
         h, r = sentence[:2], sentence[2:]
         if h not in self.db: return
         return [(h + k, math.log(v) - self.dbs)
-                for k, v in self.db[h].iteritems() if r.startswith(k)]
+                for k, v in self.db[h].items() if r.startswith(k)]

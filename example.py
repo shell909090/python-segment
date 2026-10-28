@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @date: 2011-11-22
@@ -9,8 +9,8 @@ import segment
 cut = segment.get_cutter('frq.db')
 
 def cuttest(word):
-    print word
-    print u'|'.join([i for i in cut.parse(word.decode('utf-8'))])
+    print(word)
+    print('|'.join([i for i in cut.parse(word)]))
 
 def test_dyn1():
     cuttest("这是一个伸手不见五指的黑夜。我叫孙悟空，我爱北京，我爱Python和C++。")
